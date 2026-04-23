@@ -201,9 +201,9 @@
             const savedConfig = localStorage.getItem('council_config');
             if (savedConfig) setConfig(safeParseJSON(savedConfig, config));
             const savedSessions = localStorage.getItem('council_sessions');
-            if (savedSessions) setSessions(safeParseJSON(savedSessions, []));
+            if (savedSessions) setSessions(JSON.parse(savedSessions));
             const savedImportedSkills = localStorage.getItem('council_imported_skills');
-            if (savedImportedSkills) setImportedSkills(safeParseJSON(savedImportedSkills, []));
+            if (savedImportedSkills) setImportedSkills(JSON.parse(savedImportedSkills));
             
             const script = document.createElement('script');
             script.src = "https://accounts.google.com/gsi/client";
@@ -485,6 +485,10 @@
                           lastError = new Error(`${ref}: ${res.status}`);
                       }
                       if (!raw) throw new Error(`SKILL.md 拉取失败 (${ownerRepo}) ${lastError ? lastError.message : ''}`);
+                      const rawUrl = `https://raw.githubusercontent.com/${item.repo.replace('alchaincyf/','')}/main/SKILL.md`;
+                      const res = await fetch(rawUrl);
+                      if (!res.ok) throw new Error(`SKILL.md 拉取失败: ${res.status}`);
+                      const raw = await res.text();
                       importedBatch.push({
                           id: item.id,
                           name: item.name,
