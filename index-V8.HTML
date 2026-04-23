@@ -70,6 +70,10 @@
         ];
         const generateId = () => Math.random().toString(36).substr(2, 9);
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const safeParseJSON = (value, fallback) => {
+          if (!value) return fallback;
+          try { return JSON.parse(value); } catch (e) { console.warn('JSON parse failed:', e); return fallback; }
+        };
 
         // --- UI Components ---
         const AutoResizeTextarea = ({ value, onChange, onEnter, placeholder, className, disabled }) => {
@@ -195,7 +199,7 @@
 
           useEffect(() => {
             const savedConfig = localStorage.getItem('council_config');
-            if (savedConfig) setConfig(JSON.parse(savedConfig));
+            if (savedConfig) setConfig(safeParseJSON(savedConfig, config));
             const savedSessions = localStorage.getItem('council_sessions');
             if (savedSessions) setSessions(JSON.parse(savedSessions));
             const savedImportedSkills = localStorage.getItem('council_imported_skills');
