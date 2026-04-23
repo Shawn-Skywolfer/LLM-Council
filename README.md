@@ -17,7 +17,7 @@
 
 ### 方法 1：直接打开
 
-直接用浏览器打开 `index-V9.html` 文件即可使用。
+直接用浏览器打开 `index-V9.1.html` 文件即可使用。
 
 ### 方法 2：本地服务器
 
@@ -64,7 +64,8 @@ npx serve .
 
 ```
 LLM-Concil/
-├── index-V9.html    # 完整的单文件应用（当前版本）
+├── index-V9.1.html  # 完整的单文件应用（当前版本）
+├── index-V9.html    # V9 版本
 ├── index-V8.HTML    # 旧版本备份
 ├── CLAUDE.md        # Claude Code 开发指南
 └── README.md        # 本文件
@@ -93,7 +94,7 @@ LLM-Concil/
 
 ## 开发
 
-这是一个零构建架构项目。所有修改都可以直接在 `index-V9.html` 中进行，刷新浏览器即可看到效果。
+这是一个零构建架构项目。所有修改都可以直接在 `index-V9.1.html` 中进行，刷新浏览器即可看到效果。
 
 ## 许可证
 
