@@ -37,7 +37,12 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-    <div id="root"></div>
+    <div id="root" class="min-h-screen flex items-center justify-center p-6">
+        <div class="max-w-xl w-full bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 mb-2">贤者议会 V9.1 正在加载...</h2>
+            <p class="text-sm text-slate-600 leading-relaxed">如果长时间停留在此页面，请按 <strong>Ctrl/Cmd + Shift + R</strong> 强制刷新，或使用本地服务器打开（避免 file:// 兼容性问题）。</p>
+        </div>
+    </div>
 
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
@@ -1005,8 +1010,36 @@
           );
         }
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(<CouncilOfSages />);
+        const renderFallbackError = (message) => {
+          const rootEl = document.getElementById('root');
+          if (!rootEl) return;
+          rootEl.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+              <div class="max-w-xl w-full bg-white border border-red-200 rounded-xl p-5 shadow-sm">
+                <h2 class="text-lg font-bold text-red-600 mb-2">页面加载失败（V9.1）</h2>
+                <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${String(message || '未知错误')}</p>
+                <p class="text-xs text-slate-500 mt-3">建议：1) 清理 localStorage；2) 使用 python -m http.server 启动后访问。</p>
+              </div>
+            </div>
+          `;
+        };
+
+        window.addEventListener('error', (e) => {
+          console.error('Global Error:', e.error || e.message);
+          renderFallbackError(e.error?.message || e.message);
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+          console.error('Unhandled Rejection:', e.reason);
+          renderFallbackError(e.reason?.message || e.reason);
+        });
+
+        try {
+          const root = createRoot(document.getElementById('root'));
+          root.render(<CouncilOfSages />);
+        } catch (err) {
+          console.error('Render Failed:', err);
+          renderFallbackError(err?.message || err);
+        }
     </script>
 </body>
 </html>

@@ -37,7 +37,14 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-    <div id="root"></div>
+    <div id="root">
+        <div class="min-h-screen flex items-center justify-center p-6">
+          <div class="max-w-xl w-full bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 mb-2">贤者议会 V9.1 正在加载...</h2>
+            <p class="text-sm text-slate-600 leading-relaxed">如果长时间停留在此页面，请按 <strong>Ctrl/Cmd + Shift + R</strong> 强制刷新，或使用本地服务器打开（避免 file:// 兼容性问题）。</p>
+          </div>
+        </div>
+    </div>
 
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
@@ -59,14 +66,14 @@
           { name: "纳瓦尔", description: "现代斯多葛，财富杠杆，极简理性。", color: "bg-emerald-100 border-emerald-300 text-emerald-900" }
         ];
         const BUILTIN_SKILLS = [
-          { id: "charlie-munger", name: "查理·芒格", description: "多元思维模型、反向思考、风险优先、长期主义。", repo: "alchaincyf/munger-skill", version: "builtin-1.0", profile: { mentalModels: ["反向思考", "机会成本", "能力圈"], heuristics: ["先排除明显错误，再追求最优", "避免不可逆损失"], antiPatterns: ["短期投机", "情绪化决策"], promptBlocks: { systemCore: "使用多元思维模型分析问题，先识别风险和偏见，再提出可执行决策。", debateStyle: "表达克制、逻辑严密、偏长期视角。", boundary: "不做确定性预测，强调概率与边际安全。"} } },
-          { id: "elon-musk", name: "埃隆·马斯克", description: "第一性原理、工程化拆解、激进创新。", repo: "alchaincyf/elon-musk-skill", version: "builtin-1.0", profile: { mentalModels: ["第一性原理", "极限约束", "系统重构"], heuristics: ["先问物理极限，再问工程路径", "删掉不必要步骤"], antiPatterns: ["流程崇拜", "路径依赖"], promptBlocks: { systemCore: "以第一性原理重构问题，输出可验证的工程化方案。", debateStyle: "直接、结构化、偏执行。", boundary: "不空谈愿景，必须落到约束与路径。"} } },
-          { id: "naval-ravikant", name: "纳瓦尔", description: "杠杆思维、长期复利、幸福与自由。", repo: "alchaincyf/naval-skill", version: "builtin-1.0", profile: { mentalModels: ["杠杆", "复利", "特定知识"], heuristics: ["找长期可复用的选择", "减少内耗并聚焦关键"], antiPatterns: ["并行贪多", "短期比较"], promptBlocks: { systemCore: "从杠杆与复利视角评估选择，兼顾财富与幸福。", debateStyle: "简洁、洞见型、偏一针见血。", boundary: "不制造焦虑，不鼓励盲目冒进。"} } },
-          { id: "richard-feynman", name: "费曼", description: "第一理解原则、可解释性、实验精神。", repo: "alchaincyf/feynman-skill", version: "builtin-1.0", profile: { mentalModels: ["可解释性", "实验验证", "简化抽象"], heuristics: ["不能讲清楚就不算懂", "先做可证伪假设"], antiPatterns: ["术语堆砌", "权威依赖"], promptBlocks: { systemCore: "把复杂问题讲清楚并设计可验证的检验路径。", debateStyle: "通俗、清晰、强调证据。", boundary: "若证据不足需明确不确定性。"} } },
-          { id: "nassim-taleb", name: "塔勒布", description: "反脆弱、尾部风险、杠铃策略。", repo: "alchaincyf/taleb-skill", version: "builtin-1.0", profile: { mentalModels: ["反脆弱", "黑天鹅", "凸性收益"], heuristics: ["优先管理尾部风险", "让上行开放、下行受限"], antiPatterns: ["脆弱高杠杆", "均值幻觉"], promptBlocks: { systemCore: "优先识别系统脆弱性和尾部风险，设计反脆弱方案。", debateStyle: "警觉、批判、偏风险控制。", boundary: "避免伪精确，拒绝脆弱的确定性叙事。"} } },
-          { id: "kevin-kelly", name: "凯文·凯利", description: "技术长期趋势、系统进化、乐观主义。", repo: "alchaincyf/kevin-kelly-skill", version: "builtin-1.0", profile: { mentalModels: ["技术长周期", "网络效应", "系统涌现"], heuristics: ["看10年趋势而非10天波动", "优先可持续演化路径"], antiPatterns: ["短视线性外推", "忽视生态协同"], promptBlocks: { systemCore: "从长期技术演化视角评估战略方向。", debateStyle: "前瞻、系统化、积极但不盲目。", boundary: "不忽略现实资源与组织约束。"} } },
-          { id: "socrates", name: "苏格拉底", description: "反诘法、概念澄清、价值检验。", repo: "alchaincyf/socrates-skill", version: "builtin-1.0", profile: { mentalModels: ["反诘法", "定义先行", "价值一致性"], heuristics: ["先澄清概念再讨论结论", "用问题推动推理"], antiPatterns: ["偷换概念", "未经检验的前提"], promptBlocks: { systemCore: "通过提问澄清定义、前提和价值冲突。", debateStyle: "追问式、逻辑递进、重本质。", boundary: "不过度争辩措辞，聚焦核心命题。"} } },
-          { id: "paul-graham", name: "保罗·格雷厄姆", description: "创业本质、构建用户价值、迭代成长。", repo: "alchaincyf/paul-graham-skill", version: "builtin-1.0", profile: { mentalModels: ["做用户真正要的东西", "小步快跑", "创始人主导"], heuristics: ["先验证真实需求", "以增长与留存检验假设"], antiPatterns: ["伪需求", "过早规模化"], promptBlocks: { systemCore: "以创业与产品验证视角评估方案可行性。", debateStyle: "务实、产品导向、强调实验。", boundary: "不脱离用户事实谈战略。"} } }
+          { id: "charlie-munger", name: "Charlie Munger", description: "多元思维模型、反向思考、风险优先、长期主义。", repo: "alchaincyf/munger-skill", version: "builtin-1.0", profile: { mentalModels: ["反向思考", "机会成本", "能力圈"], heuristics: ["先排除明显错误，再追求最优", "避免不可逆损失"], antiPatterns: ["短期投机", "情绪化决策"], promptBlocks: { systemCore: "使用多元思维模型分析问题，先识别风险和偏见，再提出可执行决策。", debateStyle: "表达克制、逻辑严密、偏长期视角。", boundary: "不做确定性预测，强调概率与边际安全。"} } },
+          { id: "elon-musk", name: "Elon Musk", description: "第一性原理、工程化拆解、激进创新。", repo: "alchaincyf/elon-musk-skill", version: "builtin-1.0", profile: { mentalModels: ["第一性原理", "极限约束", "系统重构"], heuristics: ["先问物理极限，再问工程路径", "删掉不必要步骤"], antiPatterns: ["流程崇拜", "路径依赖"], promptBlocks: { systemCore: "以第一性原理重构问题，输出可验证的工程化方案。", debateStyle: "直接、结构化、偏执行。", boundary: "不空谈愿景，必须落到约束与路径。"} } },
+          { id: "naval-ravikant", name: "Naval Ravikant", description: "杠杆思维、长期复利、幸福与自由。", repo: "alchaincyf/naval-skill", version: "builtin-1.0", profile: { mentalModels: ["杠杆", "复利", "特定知识"], heuristics: ["找长期可复用的选择", "减少内耗并聚焦关键"], antiPatterns: ["并行贪多", "短期比较"], promptBlocks: { systemCore: "从杠杆与复利视角评估选择，兼顾财富与幸福。", debateStyle: "简洁、洞见型、偏一针见血。", boundary: "不制造焦虑，不鼓励盲目冒进。"} } },
+          { id: "richard-feynman", name: "Richard Feynman", description: "第一理解原则、可解释性、实验精神。", repo: "alchaincyf/feynman-skill", version: "builtin-1.0", profile: { mentalModels: ["可解释性", "实验验证", "简化抽象"], heuristics: ["不能讲清楚就不算懂", "先做可证伪假设"], antiPatterns: ["术语堆砌", "权威依赖"], promptBlocks: { systemCore: "把复杂问题讲清楚并设计可验证的检验路径。", debateStyle: "通俗、清晰、强调证据。", boundary: "若证据不足需明确不确定性。"} } },
+          { id: "nassim-taleb", name: "Nassim Taleb", description: "反脆弱、尾部风险、杠铃策略。", repo: "alchaincyf/taleb-skill", version: "builtin-1.0", profile: { mentalModels: ["反脆弱", "黑天鹅", "凸性收益"], heuristics: ["优先管理尾部风险", "让上行开放、下行受限"], antiPatterns: ["脆弱高杠杆", "均值幻觉"], promptBlocks: { systemCore: "优先识别系统脆弱性和尾部风险，设计反脆弱方案。", debateStyle: "警觉、批判、偏风险控制。", boundary: "避免伪精确，拒绝脆弱的确定性叙事。"} } },
+          { id: "kevin-kelly", name: "Kevin Kelly", description: "技术长期趋势、系统进化、乐观主义。", repo: "alchaincyf/kevin-kelly-skill", version: "builtin-1.0", profile: { mentalModels: ["技术长周期", "网络效应", "系统涌现"], heuristics: ["看10年趋势而非10天波动", "优先可持续演化路径"], antiPatterns: ["短视线性外推", "忽视生态协同"], promptBlocks: { systemCore: "从长期技术演化视角评估战略方向。", debateStyle: "前瞻、系统化、积极但不盲目。", boundary: "不忽略现实资源与组织约束。"} } },
+          { id: "socrates", name: "Socrates", description: "反诘法、概念澄清、价值检验。", repo: "alchaincyf/socrates-skill", version: "builtin-1.0", profile: { mentalModels: ["反诘法", "定义先行", "价值一致性"], heuristics: ["先澄清概念再讨论结论", "用问题推动推理"], antiPatterns: ["偷换概念", "未经检验的前提"], promptBlocks: { systemCore: "通过提问澄清定义、前提和价值冲突。", debateStyle: "追问式、逻辑递进、重本质。", boundary: "不过度争辩措辞，聚焦核心命题。"} } },
+          { id: "paul-graham", name: "Paul Graham", description: "创业本质、构建用户价值、迭代成长。", repo: "alchaincyf/paul-graham-skill", version: "builtin-1.0", profile: { mentalModels: ["做用户真正要的东西", "小步快跑", "创始人主导"], heuristics: ["先验证真实需求", "以增长与留存检验假设"], antiPatterns: ["伪需求", "过早规模化"], promptBlocks: { systemCore: "以创业与产品验证视角评估方案可行性。", debateStyle: "务实、产品导向、强调实验。", boundary: "不脱离用户事实谈战略。"} } }
         ];
         const generateId = () => Math.random().toString(36).substr(2, 9);
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -191,6 +198,7 @@
           const [selectedImportSkillIds, setSelectedImportSkillIds] = useState([]);
           const [isRefreshingSkills, setIsRefreshingSkills] = useState(false);
           const [skillStatus, setSkillStatus] = useState('');
+          const [customSkillSources, setCustomSkillSources] = useState('');
 
           const scrollRef = useRef(null);
           const contextRef = useRef([]);
@@ -418,6 +426,21 @@
           const skillMap = useMemo(() => new Map(effectiveSkills.map(s => [s.id, s])), [effectiveSkills]);
 
           const normalizeSkillId = (text) => (text || '').toLowerCase().replace(/-skill$/,'').replace(/-perspective$/,'').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          const prettySkillName = (base) => base.split('-').map(w => w[0] ? w[0].toUpperCase() + w.slice(1) : '').join(' ');
+          const parseGitHubSource = (input) => {
+              const text = (input || '').trim();
+              if (!text) return null;
+              if (/^[\w.-]+\/[\w.-]+$/.test(text)) {
+                  const [owner, repo] = text.split('/');
+                  return { ownerRepo: `${owner}/${repo}`, id: normalizeSkillId(repo), name: prettySkillName(repo.replace(/-skill$/,'')) };
+              }
+              const match = text.match(/github\.com\/([^\/]+)\/([^\/#?]+)/i);
+              if (match) {
+                  const owner = match[1], repo = match[2].replace(/\.git$/, '');
+                  return { ownerRepo: `${owner}/${repo}`, id: normalizeSkillId(repo), name: prettySkillName(repo.replace(/-skill$/,'')) };
+              }
+              return null;
+          };
 
           const parseSkillMarkdown = (raw, fallbackName) => {
               const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
@@ -447,17 +470,96 @@
                     .filter(r => r.name.endsWith('-skill') && r.name !== 'nuwa-skill' && !r.name.toLowerCase().includes('zhangxuefeng'))
                     .map(r => {
                         const base = r.name.replace(/-skill$/, '');
-                        const pretty = base.split('-').map(w => w[0] ? w[0].toUpperCase() + w.slice(1) : '').join(' ');
+                        const pretty = prettySkillName(base);
                         return { id: normalizeSkillId(base), name: pretty, repo: `alchaincyf/${r.name}`, version: r.updated_at || 'unknown', updatedAt: r.updated_at || null };
                     })
                     .sort((a, b) => a.name.localeCompare(b.name));
-                  setRemoteSkills(skills);
-                  setSkillStatus(`发现 ${skills.length} 个可选 Skill，可手动勾选导入。`);
+
+                  const customSources = customSkillSources.split('\n').map(s => s.trim()).filter(Boolean);
+                  customSources.forEach((source) => {
+                      const parsed = parseGitHubSource(source);
+                      if (!parsed || parsed.ownerRepo.toLowerCase().includes('zhangxuefeng')) return;
+                      skills.push({
+                          id: parsed.id,
+                          name: parsed.name,
+                          repo: parsed.ownerRepo,
+                          version: 'custom-source',
+                          updatedAt: null
+                      });
+                  });
+
+                  const existingIds = new Set(effectiveSkills.map(s => s.id));
+                  const unique = [];
+                  const seen = new Set();
+                  skills.forEach((skill) => {
+                      if (seen.has(skill.id)) return;
+                      seen.add(skill.id);
+                      unique.push({
+                          ...skill,
+                          isDuplicate: existingIds.has(skill.id),
+                          isBuiltIn: BUILTIN_SKILLS.some(b => b.id === skill.id),
+                          isImported: importedSkills.some(i => i.id === skill.id)
+                      });
+                  });
+                  setRemoteSkills(unique);
+                  setSkillStatus(`发现 ${unique.length} 个可选 Skill（已自动标识重复项）。`);
               } catch (e) {
                   setSkillStatus(`检查失败：${e.message}`);
               } finally {
                   setIsRefreshingSkills(false);
               }
+          };
+
+          const handleLocalSkillUpload = async (event) => {
+              const files = Array.from(event.target.files || []);
+              if (!files.length) return;
+              const uploaded = [];
+              for (const file of files) {
+                  try {
+                      const raw = await file.text();
+                      if (file.name.toLowerCase().endsWith('.json')) {
+                          const parsed = safeParseJSON(raw, null);
+                          if (!parsed) continue;
+                          const list = Array.isArray(parsed) ? parsed : [parsed];
+                          list.forEach((item, idx) => {
+                              const id = normalizeSkillId(item.id || item.name || `${file.name}-${idx}`);
+                              uploaded.push({
+                                  id,
+                                  name: item.name || prettySkillName(id),
+                                  description: item.description || 'Local uploaded skill',
+                                  repo: 'local-upload',
+                                  version: 'local',
+                                  updatedAt: new Date().toISOString(),
+                                  profile: item.profile || parseSkillMarkdown(raw, item.name || prettySkillName(id))
+                              });
+                          });
+                      } else {
+                          const id = normalizeSkillId(file.name.replace(/\.(md|markdown|txt)$/i, ''));
+                          uploaded.push({
+                              id,
+                              name: prettySkillName(id),
+                              description: `${prettySkillName(id)} (local markdown skill)`,
+                              repo: 'local-upload',
+                              version: 'local',
+                              updatedAt: new Date().toISOString(),
+                              profile: parseSkillMarkdown(raw, prettySkillName(id))
+                          });
+                      }
+                  } catch (e) {
+                      console.warn('Local skill upload failed:', file.name, e);
+                  }
+              }
+              if (uploaded.length) {
+                  setImportedSkills(prev => {
+                      const byId = new Map(prev.map(s => [s.id, s]));
+                      uploaded.forEach(s => byId.set(s.id, s));
+                      return Array.from(byId.values());
+                  });
+                  setSkillStatus(`本地导入完成：${uploaded.length} 个 Skill。`);
+              } else {
+                  setSkillStatus('本地导入失败：未识别到有效 Skill 文件。');
+              }
+              event.target.value = '';
           };
 
           const toggleImportSelection = (id) => {
@@ -467,7 +569,7 @@
           const importSelectedSkills = async () => {
               if (selectedImportSkillIds.length === 0) return;
               setSkillStatus('正在导入...');
-              const targets = remoteSkills.filter(s => selectedImportSkillIds.includes(s.id));
+              const targets = remoteSkills.filter(s => selectedImportSkillIds.includes(s.id) && !s.isDuplicate);
               const importedBatch = [];
               for (const item of targets) {
                   try {
@@ -948,14 +1050,26 @@
                                             <div className="flex items-center gap-2 text-sm font-medium text-slate-700"><Database className="w-4 h-4 text-indigo-500" /> Skill 管理器</div>
                                             <button onClick={refreshRemoteSkills} disabled={isRefreshingSkills} className="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50">{isRefreshingSkills ? '检查中...' : '手动刷新最新 Skill'}</button>
                                         </div>
-                                        <div className="text-xs text-slate-500 mt-2">内置 {BUILTIN_SKILLS.length} 个（已排除张雪峰），已导入 {importedSkills.length} 个。</div>
+                                        <div className="text-xs text-slate-500 mt-2">内置 {BUILTIN_SKILLS.length} 个（已排除张雪峰），已导入 {importedSkills.length} 个。名称已统一为英文显示。</div>
+                                        <div className="mt-3">
+                                            <label className="text-xs text-slate-600 font-medium block mb-1">自定义 GitHub Skill 来源（每行一个，支持 owner/repo 或 URL）</label>
+                                            <textarea className="w-full p-2 border rounded text-xs h-20 bg-slate-50" placeholder="alchaincyf/steve-jobs-skill&#10;https://github.com/user/your-skill-repo" value={customSkillSources} onChange={(e) => setCustomSkillSources(e.target.value)} />
+                                        </div>
+                                        <div className="mt-3">
+                                            <label className="text-xs text-slate-600 font-medium block mb-1">本地上传 Skill 文件（.json / .md，可多选）</label>
+                                            <input type="file" multiple accept=".json,.md,.markdown,.txt" onChange={handleLocalSkillUpload} className="text-xs w-full" />
+                                        </div>
                                         {skillStatus && <div className="text-xs mt-2 text-indigo-600">{skillStatus}</div>}
                                         {remoteSkills.length > 0 && (
                                             <div className="mt-3 max-h-36 overflow-y-auto border rounded p-2 space-y-1 bg-slate-50">
                                                 {remoteSkills.map(skill => (
-                                                    <label key={skill.id} className="flex items-center justify-between text-xs gap-2">
-                                                        <span className="truncate">{skill.name} <span className="text-slate-400">({skill.repo.split('/')[1]})</span></span>
-                                                        <input type="checkbox" checked={selectedImportSkillIds.includes(skill.id)} onChange={() => toggleImportSelection(skill.id)} />
+                                                    <label key={skill.id} className={`flex items-center justify-between text-xs gap-2 ${skill.isDuplicate ? 'opacity-60' : ''}`}>
+                                                        <span className="truncate">
+                                                            {skill.name} <span className="text-slate-400">({skill.repo.split('/')[1] || skill.repo})</span>
+                                                            {skill.isBuiltIn && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-amber-100 text-amber-700">内置重复</span>}
+                                                            {!skill.isBuiltIn && skill.isImported && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-blue-100 text-blue-700">已导入</span>}
+                                                        </span>
+                                                        <input type="checkbox" disabled={skill.isDuplicate} checked={selectedImportSkillIds.includes(skill.id)} onChange={() => toggleImportSelection(skill.id)} />
                                                     </label>
                                                 ))}
                                             </div>
@@ -1005,8 +1119,36 @@
           );
         }
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(<CouncilOfSages />);
+        const renderFallbackError = (message) => {
+          const rootEl = document.getElementById('root');
+          if (!rootEl) return;
+          rootEl.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+              <div class="max-w-xl w-full bg-white border border-red-200 rounded-xl p-5 shadow-sm">
+                <h2 class="text-lg font-bold text-red-600 mb-2">页面加载失败（V9.1）</h2>
+                <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${String(message || '未知错误')}</p>
+                <p class="text-xs text-slate-500 mt-3">建议：1) 清理 localStorage；2) 使用 python -m http.server 启动后访问。</p>
+              </div>
+            </div>
+          `;
+        };
+
+        window.addEventListener('error', (e) => {
+          console.error('Global Error:', e.error || e.message);
+          renderFallbackError(e.error?.message || e.message);
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+          console.error('Unhandled Rejection:', e.reason);
+          renderFallbackError(e.reason?.message || e.reason);
+        });
+
+        try {
+          const root = createRoot(document.getElementById('root'));
+          root.render(<CouncilOfSages />);
+        } catch (err) {
+          console.error('Render Failed:', err);
+          renderFallbackError(err?.message || err);
+        }
     </script>
 </body>
 </html>
