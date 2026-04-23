@@ -481,6 +481,10 @@
                           lastError = new Error(`${ref}: ${res.status}`);
                       }
                       if (!raw) throw new Error(`SKILL.md 拉取失败 (${ownerRepo}) ${lastError ? lastError.message : ''}`);
+                      const rawUrl = `https://raw.githubusercontent.com/${item.repo.replace('alchaincyf/','')}/main/SKILL.md`;
+                      const res = await fetch(rawUrl);
+                      if (!res.ok) throw new Error(`SKILL.md 拉取失败: ${res.status}`);
+                      const raw = await res.text();
                       importedBatch.push({
                           id: item.id,
                           name: item.name,
