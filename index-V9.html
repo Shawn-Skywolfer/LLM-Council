@@ -467,6 +467,20 @@
               const importedBatch = [];
               for (const item of targets) {
                   try {
+                      const ownerRepo = item.repo.includes('/') ? item.repo : `alchaincyf/${item.repo}`;
+                      const candidateRefs = ['main', 'master'];
+                      let raw = '';
+                      let lastError = null;
+                      for (const ref of candidateRefs) {
+                          const rawUrl = `https://raw.githubusercontent.com/${ownerRepo}/${ref}/SKILL.md`;
+                          const res = await fetch(rawUrl);
+                          if (res.ok) {
+                              raw = await res.text();
+                              break;
+                          }
+                          lastError = new Error(`${ref}: ${res.status}`);
+                      }
+                      if (!raw) throw new Error(`SKILL.md 拉取失败 (${ownerRepo}) ${lastError ? lastError.message : ''}`);
                       const rawUrl = `https://raw.githubusercontent.com/${item.repo.replace('alchaincyf/','')}/main/SKILL.md`;
                       const res = await fetch(rawUrl);
                       if (!res.ok) throw new Error(`SKILL.md 拉取失败: ${res.status}`);
