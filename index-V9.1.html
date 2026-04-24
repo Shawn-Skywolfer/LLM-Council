@@ -7,6 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script type="importmap">
     {
@@ -80,6 +81,19 @@
         const safeParseJSON = (value, fallback) => {
           if (!value) return fallback;
           try { return JSON.parse(value); } catch (e) { console.warn('JSON parse failed:', e); return fallback; }
+        };
+        const escapeHtml = (unsafe = '') => unsafe
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+        const renderMarkdown = (text = '') => {
+          if (!text) return '';
+          if (window.marked) {
+            return window.marked.parse(text, { breaks: true, gfm: true });
+          }
+          return `<p>${escapeHtml(text).replaceAll('\n', '<br/>')}</p>`;
         };
 
         // --- UI Components ---
@@ -156,7 +170,11 @@
               <div className={`max-w-[90%] w-full rounded-2xl p-5 relative ${isMod ? 'bg-slate-800 text-white shadow-xl' : isUser ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-gray-200 shadow-sm'}`}>
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10 border-gray-100"><span className="font-bold text-sm">{msg.sender}</span></div>
                 {msg.reasoning && (<div className="mb-3"><button onClick={() => setExpandReasoning(!expandReasoning)} className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider mb-1 hover:opacity-80 transition-opacity ${isMod || isUser ? 'text-indigo-300' : 'text-slate-400'}`}><Lightbulb className="w-3 h-3" /> 思考过程 {expandReasoning ? <ChevronDown className="w-3 h-3"/> : <ChevronRight className="w-3 h-3"/>}</button>{expandReasoning && (<div className={`text-xs p-3 rounded leading-relaxed whitespace-pre-wrap ${isMod || isUser ? 'bg-white/10' : 'bg-slate-50 text-slate-500 border-l-2 border-slate-200'}`}>{msg.reasoning}</div>)}</div>)}
-                <div className={`prose prose-sm max-w-none ${isMod || isUser ? 'prose-invert' : ''}`}><p className="whitespace-pre-wrap leading-relaxed">{msg.text || <span className="animate-pulse">...</span>}</p></div>
+                <div className={`prose prose-sm max-w-none ${isMod || isUser ? 'prose-invert' : ''}`}>
+                  {msg.text
+                    ? <div className="leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }} />
+                    : <span className="animate-pulse">...</span>}
+                </div>
               </div>
             );
         };
@@ -1110,7 +1128,7 @@
                                 <div><h3 className="text-xl font-bold text-slate-900">{selectedMsg.sender}</h3><div className="text-sm text-gray-500 flex items-center gap-2">{new Date(selectedMsg.timestamp).toLocaleString()}{selectedMsg.role === 'agent' && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs">Council Member</span>}</div></div>
                             </div>
                             {selectedMsg.reasoning && (<div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-slate-700"><div className="font-bold text-amber-700 mb-2 flex items-center gap-2"><Lightbulb className="w-4 h-4"/> 深度思考过程</div><div className="whitespace-pre-wrap leading-relaxed opacity-90">{selectedMsg.reasoning}</div></div>)}
-                            <div className="prose prose-lg max-w-none text-slate-800 leading-loose"><p className="whitespace-pre-wrap">{selectedMsg.text}</p></div>
+                            <div className="prose prose-lg max-w-none text-slate-800 leading-loose" dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedMsg.text || '') }} />
                         </div>
                     )}
                 </Modal>
