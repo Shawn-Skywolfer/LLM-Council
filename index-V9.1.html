@@ -52,7 +52,7 @@
     </div>
 
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
+        import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, memo } from 'react';
         import { createRoot } from 'react-dom/client';
         import { 
           Settings, MessageSquare, Users, Play, RotateCcw, Save, Trash2, Search, Cpu, 
@@ -101,14 +101,17 @@
         };
 
         // --- UI Components ---
-        const AutoResizeTextarea = ({ value, onChange, onEnter, placeholder, className, disabled }) => {
+        const AutoResizeTextarea = ({ value, onChange, onEnter, placeholder, className, disabled, maxHeight = 240 }) => {
             const textareaRef = useRef(null);
-            useEffect(() => {
-                if (textareaRef.current) {
-                    textareaRef.current.style.height = 'auto';
-                    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-                }
-            }, [value]);
+            useLayoutEffect(() => {
+                const textarea = textareaRef.current;
+                if (!textarea) return;
+
+                textarea.style.height = 'auto';
+                const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+                textarea.style.height = `${nextHeight}px`;
+                textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+            }, [value, maxHeight]);
             const handleKeyDown = (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -116,7 +119,7 @@
                 }
             };
             return (
-                <textarea ref={textareaRef} value={value} onChange={onChange} onKeyDown={handleKeyDown} placeholder={placeholder} className={className} disabled={disabled} rows={1} style={{ resize: 'none', overflow: 'hidden', minHeight: '44px' }} />
+                <textarea ref={textareaRef} value={value} onChange={onChange} onKeyDown={handleKeyDown} placeholder={placeholder} className={className} disabled={disabled} rows={1} style={{ resize: 'none', overflowY: 'hidden', minHeight: '44px', maxHeight: `${maxHeight}px` }} />
             );
         };
 
