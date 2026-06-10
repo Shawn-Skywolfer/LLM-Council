@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贤者议会 (Council of Sages)</title>
-    
+    <title>Council of Sages</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -18,7 +18,7 @@
         }
     }
     </script>
-    
+
     <style>
         @keyframes spin { to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
@@ -30,7 +30,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
+
         .modal-overlay { animation: fadeIn 0.2s ease-out; }
         .modal-content { animation: scaleIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -40,13 +40,13 @@
 <body class="bg-slate-50 text-slate-900">
     <div id="root">
         <div class="fixed top-4 right-4 z-50 flex items-center rounded-lg border border-slate-200 bg-white p-1 text-xs font-semibold shadow-sm" aria-label="Language switcher">
-          <a href="index-V9.1.html" class="rounded-md px-3 py-1.5 bg-indigo-600 text-white" aria-current="page">中文</a>
-          <a href="index-V9.1-en.html" class="rounded-md px-3 py-1.5 text-slate-500 hover:bg-slate-100" >EN</a>
+          <a href="index-V9.1.html" class="rounded-md px-3 py-1.5 text-slate-500 hover:bg-slate-100" >中文</a>
+          <a href="index-V9.1-en.html" class="rounded-md px-3 py-1.5 bg-indigo-600 text-white" aria-current="page">EN</a>
         </div>
         <div class="min-h-screen flex items-center justify-center p-6">
           <div class="max-w-xl w-full bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-            <h2 class="text-lg font-bold text-slate-800 mb-2">贤者议会 V9.1 正在加载...</h2>
-            <p class="text-sm text-slate-600 leading-relaxed">如果长时间停留在此页面，请按 <strong>Ctrl/Cmd + Shift + R</strong> 强制刷新，或使用本地服务器打开（避免 file:// 兼容性问题）。</p>
+            <h2 class="text-lg font-bold text-slate-800 mb-2">Council of Sages V9.1 is loading...</h2>
+            <p class="text-sm text-slate-600 leading-relaxed">If this screen remains for too long, press <strong>Ctrl/Cmd + Shift + R</strong> to force-refresh, or open the app through a local server to avoid file:// compatibility issues.</p>
           </div>
         </div>
     </div>
@@ -54,31 +54,31 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { 
-          Settings, MessageSquare, Users, Play, RotateCcw, Save, Trash2, Search, Cpu, 
-          CheckCircle2, AlertCircle, History, BrainCircuit, Edit3, Send, User, 
-          Info, Plug, Zap, Expand, ChevronDown, ChevronRight, Lightbulb, Plus, 
+        import {
+          Settings, MessageSquare, Users, Play, RotateCcw, Save, Trash2, Search, Cpu,
+          CheckCircle2, AlertCircle, History, BrainCircuit, Edit3, Send, User,
+          Info, Plug, Zap, Expand, ChevronDown, ChevronRight, Lightbulb, Plus,
           Download, FileText, RefreshCw, LayoutGrid, List, X, Maximize2, Filter,
           ToggleLeft, ToggleRight, Mic2, Star, Feather, UserPlus, Cloud, UploadCloud, LogOut, Sliders, Wrench, Square, Database
         } from 'lucide-react';
 
         const DEFAULT_BASE_URL = "https://api.openai.com/v1";
         const FALLBACK_AGENTS_POOL = [
-          { name: "查理·芒格", description: "反向思维，极度理性，规避风险，普世智慧。", color: "bg-blue-100 border-blue-300 text-blue-900" },
-          { name: "埃隆·马斯克", description: "第一性原理，激进创新，多行星物种。", color: "bg-purple-100 border-purple-300 text-purple-900" },
-          { name: "苏格拉底", description: "反诘法，承认无知，寻求本质。", color: "bg-amber-100 border-amber-300 text-amber-900" },
-          { name: "凯文·凯利", description: "科技乐观主义，技术进化，失控。", color: "bg-rose-100 border-rose-300 text-rose-900" },
-          { name: "纳瓦尔", description: "现代斯多葛，财富杠杆，极简理性。", color: "bg-emerald-100 border-emerald-300 text-emerald-900" }
+          { name: "Charlie Munger", description: "Inversion, rigorous rationality, risk avoidance, and worldly wisdom.", color: "bg-blue-100 border-blue-300 text-blue-900" },
+          { name: "Elon Musk", description: "First-principles thinking, radical innovation, and a multiplanetary future.", color: "bg-purple-100 border-purple-300 text-purple-900" },
+          { name: "Socrates", description: "Socratic questioning, intellectual humility, and a search for first principles.", color: "bg-amber-100 border-amber-300 text-amber-900" },
+          { name: "Kevin Kelly", description: "Technological optimism, technological evolution, and emergent systems.", color: "bg-rose-100 border-rose-300 text-rose-900" },
+          { name: "Naval Ravikant", description: "Modern Stoicism, leveraged wealth creation, and minimalist rationality.", color: "bg-emerald-100 border-emerald-300 text-emerald-900" }
         ];
         const BUILTIN_SKILLS = [
-          { id: "charlie-munger", name: "Charlie Munger", description: "多元思维模型、反向思考、风险优先、长期主义。", repo: "alchaincyf/munger-skill", version: "builtin-1.0", profile: { mentalModels: ["反向思考", "机会成本", "能力圈"], heuristics: ["先排除明显错误，再追求最优", "避免不可逆损失"], antiPatterns: ["短期投机", "情绪化决策"], promptBlocks: { systemCore: "使用多元思维模型分析问题，先识别风险和偏见，再提出可执行决策。", debateStyle: "表达克制、逻辑严密、偏长期视角。", boundary: "不做确定性预测，强调概率与边际安全。"} } },
-          { id: "elon-musk", name: "Elon Musk", description: "第一性原理、工程化拆解、激进创新。", repo: "alchaincyf/elon-musk-skill", version: "builtin-1.0", profile: { mentalModels: ["第一性原理", "极限约束", "系统重构"], heuristics: ["先问物理极限，再问工程路径", "删掉不必要步骤"], antiPatterns: ["流程崇拜", "路径依赖"], promptBlocks: { systemCore: "以第一性原理重构问题，输出可验证的工程化方案。", debateStyle: "直接、结构化、偏执行。", boundary: "不空谈愿景，必须落到约束与路径。"} } },
-          { id: "naval-ravikant", name: "Naval Ravikant", description: "杠杆思维、长期复利、幸福与自由。", repo: "alchaincyf/naval-skill", version: "builtin-1.0", profile: { mentalModels: ["杠杆", "复利", "特定知识"], heuristics: ["找长期可复用的选择", "减少内耗并聚焦关键"], antiPatterns: ["并行贪多", "短期比较"], promptBlocks: { systemCore: "从杠杆与复利视角评估选择，兼顾财富与幸福。", debateStyle: "简洁、洞见型、偏一针见血。", boundary: "不制造焦虑，不鼓励盲目冒进。"} } },
-          { id: "richard-feynman", name: "Richard Feynman", description: "第一理解原则、可解释性、实验精神。", repo: "alchaincyf/feynman-skill", version: "builtin-1.0", profile: { mentalModels: ["可解释性", "实验验证", "简化抽象"], heuristics: ["不能讲清楚就不算懂", "先做可证伪假设"], antiPatterns: ["术语堆砌", "权威依赖"], promptBlocks: { systemCore: "把复杂问题讲清楚并设计可验证的检验路径。", debateStyle: "通俗、清晰、强调证据。", boundary: "若证据不足需明确不确定性。"} } },
-          { id: "nassim-taleb", name: "Nassim Taleb", description: "反脆弱、尾部风险、杠铃策略。", repo: "alchaincyf/taleb-skill", version: "builtin-1.0", profile: { mentalModels: ["反脆弱", "黑天鹅", "凸性收益"], heuristics: ["优先管理尾部风险", "让上行开放、下行受限"], antiPatterns: ["脆弱高杠杆", "均值幻觉"], promptBlocks: { systemCore: "优先识别系统脆弱性和尾部风险，设计反脆弱方案。", debateStyle: "警觉、批判、偏风险控制。", boundary: "避免伪精确，拒绝脆弱的确定性叙事。"} } },
-          { id: "kevin-kelly", name: "Kevin Kelly", description: "技术长期趋势、系统进化、乐观主义。", repo: "alchaincyf/kevin-kelly-skill", version: "builtin-1.0", profile: { mentalModels: ["技术长周期", "网络效应", "系统涌现"], heuristics: ["看10年趋势而非10天波动", "优先可持续演化路径"], antiPatterns: ["短视线性外推", "忽视生态协同"], promptBlocks: { systemCore: "从长期技术演化视角评估战略方向。", debateStyle: "前瞻、系统化、积极但不盲目。", boundary: "不忽略现实资源与组织约束。"} } },
-          { id: "socrates", name: "Socrates", description: "反诘法、概念澄清、价值检验。", repo: "alchaincyf/socrates-skill", version: "builtin-1.0", profile: { mentalModels: ["反诘法", "定义先行", "价值一致性"], heuristics: ["先澄清概念再讨论结论", "用问题推动推理"], antiPatterns: ["偷换概念", "未经检验的前提"], promptBlocks: { systemCore: "通过提问澄清定义、前提和价值冲突。", debateStyle: "追问式、逻辑递进、重本质。", boundary: "不过度争辩措辞，聚焦核心命题。"} } },
-          { id: "paul-graham", name: "Paul Graham", description: "创业本质、构建用户价值、迭代成长。", repo: "alchaincyf/paul-graham-skill", version: "builtin-1.0", profile: { mentalModels: ["做用户真正要的东西", "小步快跑", "创始人主导"], heuristics: ["先验证真实需求", "以增长与留存检验假设"], antiPatterns: ["伪需求", "过早规模化"], promptBlocks: { systemCore: "以创业与产品验证视角评估方案可行性。", debateStyle: "务实、产品导向、强调实验。", boundary: "不脱离用户事实谈战略。"} } }
+          { id: "charlie-munger", name: "Charlie Munger", description: "A latticework of mental models, inversion, risk-first thinking, and long-termism.", repo: "alchaincyf/munger-skill", version: "builtin-1.0", profile: { mentalModels: ["Inversion", "Opportunity cost", "Circle of competence"], heuristics: ["Eliminate obvious mistakes before optimizing", "Avoid irreversible losses"], antiPatterns: ["Short-term speculation", "Emotion-driven decisions"], promptBlocks: { systemCore: "Analyze problems through multiple mental models; identify risks and biases before proposing actionable decisions.", debateStyle: "Be measured, logically rigorous, and oriented toward the long term.", boundary: "Avoid deterministic predictions; emphasize probabilities and a margin of safety."} } },
+          { id: "elon-musk", name: "Elon Musk", description: "First principles, engineering decomposition, and radical innovation.", repo: "alchaincyf/elon-musk-skill", version: "builtin-1.0", profile: { mentalModels: ["First principles", "Hard constraints", "System redesign"], heuristics: ["Start with physical limits, then determine the engineering path", "Remove unnecessary steps"], antiPatterns: ["Process worship", "Path dependence"], promptBlocks: { systemCore: "Reframe the problem from first principles and produce a testable engineering plan.", debateStyle: "Be direct, structured, and execution-focused.", boundary: "Do not stop at vision; ground every proposal in constraints and an implementation path."} } },
+          { id: "naval-ravikant", name: "Naval Ravikant", description: "Leverage, long-term compounding, happiness, and freedom.", repo: "alchaincyf/naval-skill", version: "builtin-1.0", profile: { mentalModels: ["Leverage", "Compounding", "Specific knowledge"], heuristics: ["Seek choices that remain reusable over the long term", "Reduce internal friction and focus on what matters"], antiPatterns: ["Taking on too many parallel pursuits", "Short-term comparison"], promptBlocks: { systemCore: "Evaluate choices through leverage and compounding while balancing wealth and happiness.", debateStyle: "Be concise, insightful, and incisive.", boundary: "Do not create anxiety or encourage reckless action."} } },
+          { id: "richard-feynman", name: "Richard Feynman", description: "First-principles understanding, explainability, and experimental thinking.", repo: "alchaincyf/feynman-skill", version: "builtin-1.0", profile: { mentalModels: ["Explainability", "Experimental validation", "Simplified abstraction"], heuristics: ["If you cannot explain it clearly, you do not understand it", "Begin with a falsifiable hypothesis"], antiPatterns: ["Jargon stacking", "Reliance on authority"], promptBlocks: { systemCore: "Explain complex problems clearly and design a verifiable testing path.", debateStyle: "Use plain language, clarity, and evidence.", boundary: "State uncertainty explicitly when evidence is insufficient."} } },
+          { id: "nassim-taleb", name: "Nassim Taleb", description: "Antifragility, tail risk, and the barbell strategy.", repo: "alchaincyf/taleb-skill", version: "builtin-1.0", profile: { mentalModels: ["Antifragility", "Black swans", "Convex payoffs"], heuristics: ["Manage tail risks first", "Keep upside open while limiting downside"], antiPatterns: ["Fragile high leverage", "The illusion of averages"], promptBlocks: { systemCore: "Identify systemic fragility and tail risks first, then design an antifragile approach.", debateStyle: "Be vigilant, critical, and risk-control oriented.", boundary: "Avoid false precision and reject fragile narratives of certainty."} } },
+          { id: "kevin-kelly", name: "Kevin Kelly", description: "Long-term technology trends, system evolution, and optimism.", repo: "alchaincyf/kevin-kelly-skill", version: "builtin-1.0", profile: { mentalModels: ["Long technology cycles", "Network effects", "Emergence"], heuristics: ["Focus on ten-year trends rather than ten-day fluctuations", "Prefer sustainable evolutionary paths"], antiPatterns: ["Short-sighted linear extrapolation", "Ignoring ecosystem synergies"], promptBlocks: { systemCore: "Evaluate strategic direction through the lens of long-term technological evolution.", debateStyle: "Be forward-looking, systematic, and optimistic without being naive.", boundary: "Do not ignore real-world resource and organizational constraints."} } },
+          { id: "socrates", name: "Socrates", description: "Socratic questioning, conceptual clarity, and examination of values.", repo: "alchaincyf/socrates-skill", version: "builtin-1.0", profile: { mentalModels: ["Socratic questioning", "Define terms first", "Value consistency"], heuristics: ["Clarify concepts before debating conclusions", "Advance reasoning through questions"], antiPatterns: ["Equivocation", "Untested assumptions"], promptBlocks: { systemCore: "Use questions to clarify definitions, assumptions, and value conflicts.", debateStyle: "Probe through progressively structured logic and focus on essentials.", boundary: "Do not over-argue wording; focus on the core proposition."} } },
+          { id: "paul-graham", name: "Paul Graham", description: "The fundamentals of startups, user value, and iterative growth.", repo: "alchaincyf/paul-graham-skill", version: "builtin-1.0", profile: { mentalModels: ["Make something people want", "Iterate quickly in small steps", "Founder-led execution"], heuristics: ["Validate genuine demand first", "Test assumptions through growth and retention"], antiPatterns: ["False demand", "Premature scaling"], promptBlocks: { systemCore: "Evaluate feasibility through startup execution and product validation.", debateStyle: "Be pragmatic, product-oriented, and experimental.", boundary: "Do not discuss strategy without grounding it in user evidence."} } }
         ];
         const generateId = () => Math.random().toString(36).substr(2, 9);
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -159,7 +159,7 @@
                     </div>
                     <div className="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400">
                         <span>{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        <button onClick={(e) => { e.stopPropagation(); onSelect(msg); }} className="flex items-center gap-1 text-indigo-500 hover:text-indigo-700 font-medium px-2 py-1 rounded hover:bg-indigo-50 transition-colors">展开阅读 <Maximize2 className="w-3 h-3" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); onSelect(msg); }} className="flex items-center gap-1 text-indigo-500 hover:text-indigo-700 font-medium px-2 py-1 rounded hover:bg-indigo-50 transition-colors">Read more <Maximize2 className="w-3 h-3" /></button>
                     </div>
                 </div>
              );
@@ -173,7 +173,7 @@
             return (
               <div className={`max-w-[90%] w-full rounded-2xl p-5 relative ${isMod ? 'bg-slate-800 text-white shadow-xl' : isUser ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-gray-200 shadow-sm'}`}>
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10 border-gray-100"><span className="font-bold text-sm">{msg.sender}</span></div>
-                {msg.reasoning && (<div className="mb-3"><button onClick={() => setExpandReasoning(!expandReasoning)} className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider mb-1 hover:opacity-80 transition-opacity ${isMod || isUser ? 'text-indigo-300' : 'text-slate-400'}`}><Lightbulb className="w-3 h-3" /> 思考过程 {expandReasoning ? <ChevronDown className="w-3 h-3"/> : <ChevronRight className="w-3 h-3"/>}</button>{expandReasoning && (<div className={`text-xs p-3 rounded leading-relaxed whitespace-pre-wrap ${isMod || isUser ? 'bg-white/10' : 'bg-slate-50 text-slate-500 border-l-2 border-slate-200'}`}>{msg.reasoning}</div>)}</div>)}
+                {msg.reasoning && (<div className="mb-3"><button onClick={() => setExpandReasoning(!expandReasoning)} className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider mb-1 hover:opacity-80 transition-opacity ${isMod || isUser ? 'text-indigo-300' : 'text-slate-400'}`}><Lightbulb className="w-3 h-3" /> Reasoning {expandReasoning ? <ChevronDown className="w-3 h-3"/> : <ChevronRight className="w-3 h-3"/>}</button>{expandReasoning && (<div className={`text-xs p-3 rounded leading-relaxed whitespace-pre-wrap ${isMod || isUser ? 'bg-white/10' : 'bg-slate-50 text-slate-500 border-l-2 border-slate-200'}`}>{msg.reasoning}</div>)}</div>)}
                 <div className={`prose prose-sm max-w-none ${isMod || isUser ? 'prose-invert' : ''}`}>
                   {msg.text
                     ? <div className="leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }} />
@@ -188,7 +188,7 @@
           const [config, setConfig] = useState({
             baseUrl: '', apiKey: '', model: 'gpt-3.5-turbo', moderatorModel: 'gpt-3.5-turbo',
             deepDebate: false, expandedCouncil: false, debateRounds: 2,
-            agentStylePrompt: "", specifyAgents: false, googleClientId: '' 
+            agentStylePrompt: "", specifyAgents: false, googleClientId: ''
           });
           const [customAgentNames, setCustomAgentNames] = useState(Array(5).fill(''));
           const [customAgentSkills, setCustomAgentSkills] = useState(Array(5).fill(''));
@@ -197,14 +197,14 @@
           const [connectionStatus, setConnectionStatus] = useState('idle');
           const [errorMessage, setErrorMessage] = useState('');
           const [manualModelInput, setManualModelInput] = useState(true);
-          const [modelFilter, setModelFilter] = useState(''); 
-          const [modFilter, setModFilter] = useState(''); 
-          const [viewMode, setViewMode] = useState('board'); 
+          const [modelFilter, setModelFilter] = useState('');
+          const [modFilter, setModFilter] = useState('');
+          const [viewMode, setViewMode] = useState('board');
 
           // Google Drive State
           const [isGoogleSignedIn, setIsGoogleSignedIn] = useState(false);
           const [googleToken, setGoogleToken] = useState(null);
-          const [driveStatus, setDriveStatus] = useState('idle'); 
+          const [driveStatus, setDriveStatus] = useState('idle');
 
           const [topic, setTopic] = useState(() => sessionStorage.getItem('council_topic_draft') || '');
           const [sessions, setSessions] = useState([]);
@@ -228,9 +228,9 @@
           const abortControllerRef = useRef(null); // Ref for abort controller
 
           useEffect(() => {
-            const savedConfig = localStorage.getItem('council_config');
+            const savedConfig = localStorage.getItem('council_config') || localStorage.getItem('council_en_config');
             if (savedConfig) setConfig(safeParseJSON(savedConfig, config));
-            const savedSessions = localStorage.getItem('council_sessions');
+            const savedSessions = localStorage.getItem('council_sessions') || localStorage.getItem('council_en_sessions');
             const parsedSessions = savedSessions ? safeParseJSON(savedSessions, []) : [];
             setSessions(parsedSessions);
 
@@ -242,9 +242,9 @@
                 setTopic(activeSession.topic);
                 setAgents(activeSession.agents || []);
                 setTranscript(activeSession.transcript || []);
-                const rebuiltContext = [`当前议题: ${activeSession.topic}`];
+                const rebuiltContext = [`Current topic: ${activeSession.topic}`];
                 (activeSession.transcript || []).forEach(message => {
-                    const prefix = message.role === 'user' ? '[用户介入]: ' : `${message.sender}: `;
+                    const prefix = message.role === 'user' ? '[User intervention]: ' : `${message.sender}: `;
                     rebuiltContext.push(`${prefix}${message.text}`);
                 });
                 contextRef.current = rebuiltContext;
@@ -254,9 +254,9 @@
             sessionStorage.removeItem('council_active_session_id');
             sessionStorage.removeItem('council_topic_draft');
             sessionStorage.removeItem('council_user_draft');
-            const savedImportedSkills = localStorage.getItem('council_imported_skills');
+            const savedImportedSkills = localStorage.getItem('council_imported_skills') || localStorage.getItem('council_en_imported_skills');
             if (savedImportedSkills) setImportedSkills(safeParseJSON(savedImportedSkills, []));
-            
+
             const script = document.createElement('script');
             script.src = "https://accounts.google.com/gsi/client";
             script.async = true;
@@ -277,8 +277,8 @@
 
           // --- Google Drive Logic ---
           const handleGoogleLogin = () => {
-              if (!config.googleClientId) { alert("请先在设置底部配置 Google Client ID"); setIsSettingsOpen(true); return; }
-              if (!window.google) { alert("Google 脚本加载中，请稍后"); return; }
+              if (!config.googleClientId) { alert("Please configure a Google Client ID at the bottom of Settings first."); setIsSettingsOpen(true); return; }
+              if (!window.google) { alert("The Google sign-in script is loading. Please try again shortly."); return; }
               const client = window.google.accounts.oauth2.initTokenClient({
                   client_id: config.googleClientId,
                   scope: 'https://www.googleapis.com/auth/drive.file',
@@ -310,7 +310,7 @@
                   setDriveStatus('success'); setTimeout(() => setDriveStatus('idle'), 3000);
               } catch (error) {
                   console.error("Drive Upload Error:", error); setDriveStatus('error');
-                  alert(`上传失败: ${error.message}\n请检查 Authorized Origins 配置。`);
+                  alert(`Upload failed: ${error.message}\nPlease check your Authorized JavaScript origins configuration.`);
               }
           };
 
@@ -339,7 +339,7 @@
                          if (session.id === activeId) {
                              const existingTranscript = session.transcript ? [...session.transcript] : [];
                              const msgIndex = existingTranscript.findIndex(m => m.id === msgId);
-                             const updatedMsg = { 
+                             const updatedMsg = {
                                  id: msgId, text: finalText, reasoning: finalReasoning, timestamp: Date.now(),
                                  role: existingTranscript[msgIndex]?.role || 'unknown',
                                  sender: existingTranscript[msgIndex]?.sender || 'Unknown',
@@ -359,7 +359,7 @@
             const id = generateId();
             const msg = { id, sender, role, text, reasoning, style, timestamp: Date.now() };
             setTranscript(prev => [...prev, msg]);
-            const prefix = role === 'user' ? `[用户介入]: ` : `${sender}: `;
+            const prefix = role === 'user' ? `[User intervention]: ` : `${sender}: `;
             contextRef.current.push(`${prefix}${text}`);
             const activeId = activeSessionIdRef.current;
             if (activeId) {
@@ -377,10 +377,10 @@
           const streamLLM = async (messages, specificModel, onToken, onReasoningToken) => {
             const url = getCleanUrl() + "/chat/completions";
             const modelToUse = specificModel || config.model;
-            
+
             // Use the abort signal from the ref if available
             const signal = abortControllerRef.current ? abortControllerRef.current.signal : null;
-            
+
             try {
               const res = await fetch(url, {
                 method: 'POST',
@@ -417,10 +417,10 @@
               // Ignore abort errors
               if (error.name === 'AbortError') {
                  console.log('Stream aborted');
-                 return; 
+                 return;
               }
               console.error("Stream Failed:", error);
-              if (error.name === 'TypeError' && error.message.includes('fetch')) throw new Error(`网络中断 (可能是CORS或超时)。建议检查网络或使用插件。`);
+              if (error.name === 'TypeError' && error.message.includes('fetch')) throw new Error(`The network request failed (possibly due to CORS or a timeout). Check your connection or use a compatible browser extension.`);
               throw error;
             }
           };
@@ -432,7 +432,7 @@
           };
 
           const fetchModels = async () => {
-             if (!config.apiKey) { setErrorMessage("请先输入 API Key"); setConnectionStatus('error'); return; }
+             if (!config.apiKey) { setErrorMessage("Please enter an API key first."); setConnectionStatus('error'); return; }
              setConnectionStatus('testing'); setErrorMessage('');
              try {
                const res = await fetch(`${getCleanUrl()}/models`, { headers: { 'Authorization': `Bearer ${config.apiKey.trim()}` } });
@@ -442,13 +442,13 @@
                if(ids.length === 0) throw new Error("No models");
                setAvailableModels(ids); setConnectionStatus('success'); setManualModelInput(false);
              } catch(e) {
-               console.warn(e); 
+               console.warn(e);
                if (!manualModelInput) setManualModelInput(true);
-               setConnectionStatus('warning'); 
-               setErrorMessage(`连接测试失败: ${e.message}。请检查 URL/Key 或 CORS 设置。`);
+               setConnectionStatus('warning');
+               setErrorMessage(`Connection test failed: ${e.message}. Check the URL, API key, and CORS settings.`);
              }
           };
-          
+
           const testConnection = () => { fetchModels(); };
 
           const filteredModels = useMemo(() => {
@@ -456,7 +456,7 @@
               return availableModels.filter(m => m.toLowerCase().includes(modelFilter.toLowerCase()));
           }, [availableModels, modelFilter]);
 
-          const filteredModModels = useMemo(() => { 
+          const filteredModModels = useMemo(() => {
               if (!modFilter.trim()) return availableModels;
               return availableModels.filter(m => m.toLowerCase().includes(modFilter.toLowerCase()));
           }, [availableModels, modFilter]);
@@ -491,13 +491,13 @@
               const pick = (keyword) => lines.filter(l => l.includes(keyword)).slice(0, 5).map(l => l.replace(/^[-*]\s*/, ''));
               const short = lines.filter(l => !l.startsWith('#') && l.length > 15).slice(0, 4).join(' ');
               return {
-                  mentalModels: pick('model').concat(pick('模型')).slice(0, 6),
-                  heuristics: pick('heuristic').concat(pick('启发')).slice(0, 8),
-                  antiPatterns: pick('anti').concat(pick('禁忌')).slice(0, 6),
+                  mentalModels: pick('model').concat(pick('\u6a21\u578b')).slice(0, 6),
+                  heuristics: pick('heuristic').concat(pick('\u542f\u53d1')).slice(0, 8),
+                  antiPatterns: pick('anti').concat(pick('\u7981\u5fcc')).slice(0, 6),
                   promptBlocks: {
-                      systemCore: `你是 ${fallbackName} 的思维蒸馏版本。优先遵循其认知框架回答，而非模仿语气。`,
-                      debateStyle: `在辩论中保持该人物方法论一致性，输出结构化观点与理由。`,
-                      boundary: `如果证据不足，明确不确定性与假设前提。`
+                      systemCore: `You are a distilled reasoning profile of ${fallbackName}. Follow this person's cognitive framework rather than merely imitating their tone.`,
+                      debateStyle: `Keep the methodology consistent throughout the debate and provide structured claims with supporting reasons.`,
+                      boundary: `When evidence is insufficient, state the uncertainty and assumptions explicitly.`
                   },
                   rawExcerpt: short
               };
@@ -546,9 +546,9 @@
                       });
                   });
                   setRemoteSkills(unique);
-                  setSkillStatus(`发现 ${unique.length} 个可选 Skill（已自动标识重复项）。`);
+                  setSkillStatus(`Found ${unique.length} available skills; duplicates have been marked automatically.`);
               } catch (e) {
-                  setSkillStatus(`检查失败：${e.message}`);
+                  setSkillStatus(`Refresh failed: ${e.message}`);
               } finally {
                   setIsRefreshingSkills(false);
               }
@@ -599,9 +599,9 @@
                       uploaded.forEach(s => byId.set(s.id, s));
                       return Array.from(byId.values());
                   });
-                  setSkillStatus(`本地导入完成：${uploaded.length} 个 Skill。`);
+                  setSkillStatus(`Local import complete: ${uploaded.length} skill(s).`);
               } else {
-                  setSkillStatus('本地导入失败：未识别到有效 Skill 文件。');
+                  setSkillStatus('Local import failed: no valid skill files were recognized.');
               }
               event.target.value = '';
           };
@@ -612,7 +612,7 @@
 
           const importSelectedSkills = async () => {
               if (selectedImportSkillIds.length === 0) return;
-              setSkillStatus('正在导入...');
+              setSkillStatus('Importing...');
               const targets = remoteSkills.filter(s => selectedImportSkillIds.includes(s.id) && !s.isDuplicate);
               const importedBatch = [];
               for (const item of targets) {
@@ -630,11 +630,11 @@
                           }
                           lastError = new Error(`${ref}: ${res.status}`);
                       }
-                      if (!raw) throw new Error(`SKILL.md 拉取失败 (${ownerRepo}) ${lastError ? lastError.message : ''}`);
+                      if (!raw) throw new Error(`Failed to fetch SKILL.md (${ownerRepo}) ${lastError ? lastError.message : ''}`);
                       importedBatch.push({
                           id: item.id,
                           name: item.name,
-                          description: `${item.name} 思维蒸馏 Skill（手动导入）`,
+                          description: `${item.name} distilled reasoning skill (manual import)`,
                           repo: item.repo,
                           version: item.version,
                           updatedAt: item.updatedAt,
@@ -650,9 +650,9 @@
                       importedBatch.forEach(s => byId.set(s.id, s));
                       return Array.from(byId.values());
                   });
-                  setSkillStatus(`导入完成：${importedBatch.length} 个 Skill。`);
+                  setSkillStatus(`Import complete: ${importedBatch.length} skill(s).`);
               } else {
-                  setSkillStatus('导入失败：未成功导入任何 Skill。');
+                  setSkillStatus('Import failed: no skills were imported.');
               }
               setSelectedImportSkillIds([]);
           };
@@ -665,7 +665,7 @@
             setIsProcessing(false);
             setStage('idle');
             // Reset to show input, but keep topic
-            setTranscript([]); 
+            setTranscript([]);
             setAgents([]);
             // Also reset session details to ensure we start fresh if they click start again
             setCurrentSessionId(null);
@@ -679,7 +679,7 @@
             for (const agent of currentAgents) {
               // Check abort before each agent starts
               if (abortControllerRef.current?.signal.aborted) return;
-              
+
               const msgId = addToTranscript(agent.name, 'agent', '', agent.style, '');
               let attempts = 0; const maxAttempts = 3; let success = false;
               while(attempts < maxAttempts && !success) {
@@ -690,16 +690,16 @@
                   if (fullHistory.length > 25) {
                       const topicMsg = fullHistory[0];
                       const recentMsgs = fullHistory.slice(-20);
-                      contextStr = [topicMsg, "...(中间历史省略)...", ...recentMsgs].join("\n\n");
+                      contextStr = [topicMsg, "...(earlier history omitted)...", ...recentMsgs].join("\n\n");
                   } else { contextStr = fullHistory.join("\n\n"); }
 
-                  let instruction = roundType === 'initial' ? "发表初始核心观点，鲜明犀利。" : (config.deepDebate ? "深度辩论：必须引用他人观点，进行批判或反思。" : "交叉审议：回应他人观点。");
-                  const styleConstraint = config.agentStylePrompt ? `\n【全局语言风格约束】：${config.agentStylePrompt}\n请务必严格遵守上述风格约束。` : "";
-                  const skillConstraint = agent.skillProfile ? `\n【Skill系统约束】\n核心框架: ${agent.skillProfile.promptBlocks?.systemCore || ''}\n辩论风格: ${agent.skillProfile.promptBlocks?.debateStyle || ''}\n边界: ${agent.skillProfile.promptBlocks?.boundary || ''}\n启发式: ${(agent.skillProfile.heuristics || []).slice(0, 4).join('；')}` : "";
-                  const prompt = `你现在是 ${agent.name}。人设: ${agent.description}。\n议题: "${topic}"。\n历史记录: """${contextStr}"""\n${instruction}\n${skillConstraint}\n${styleConstraint}\n要求: 完全使用中文。`;
-                  
+                  let instruction = roundType === 'initial' ? "Present a clear, incisive opening position." : (config.deepDebate ? "Deep debate: quote or explicitly reference another participant, then critique or reconsider their position." : "Cross-examination: respond directly to another participant's argument.");
+                  const styleConstraint = config.agentStylePrompt ? `\n[Global style constraint]：${config.agentStylePrompt}\nFollow the style constraint above strictly.` : "";
+                  const skillConstraint = agent.skillProfile ? `\n[Skill constraints]\nCore framework: ${agent.skillProfile.promptBlocks?.systemCore || ''}\nDebate style: ${agent.skillProfile.promptBlocks?.debateStyle || ''}\nBoundaries: ${agent.skillProfile.promptBlocks?.boundary || ''}\nHeuristics: ${(agent.skillProfile.heuristics || []).slice(0, 4).join('；')}` : "";
+                  const prompt = `You are ${agent.name}. Persona: ${agent.description}.\nTopic: "${topic}".\nDebate history: """${contextStr}"""\n${instruction}\n${skillConstraint}\n${styleConstraint}\nRequirement: Respond entirely in English.`;
+
                   let currentText = ""; let currentReasoning = "";
-                  await streamLLM([{ role: "user", content: prompt }], config.model, 
+                  await streamLLM([{ role: "user", content: prompt }], config.model,
                     (t) => { currentText += t; updateMessage(msgId, currentText, currentReasoning); },
                     (r) => { currentReasoning += r; updateMessage(msgId, currentText, currentReasoning); }
                   );
@@ -711,8 +711,8 @@
                 } catch (e) {
                   if (abortControllerRef.current?.signal.aborted) return; // Silent exit on abort
                   attempts++;
-                  if (attempts < maxAttempts) { updateMessage(msgId, `(重试 ${attempts}...)`, ""); await delay(1000 * attempts); }
-                  else { updateMessage(msgId, `(网络中断: ${e.message})`, ""); }
+                  if (attempts < maxAttempts) { updateMessage(msgId, `(Retrying: attempt ${attempts}...)`, ""); await delay(1000 * attempts); }
+                  else { updateMessage(msgId, `(Network error: ${e.message})`, ""); }
                 }
               }
             }
@@ -721,28 +721,28 @@
 
           const runConsensus = async () => {
             if (abortControllerRef.current?.signal.aborted) return;
-            
-            const msgId = addToTranscript('主持人', 'moderator', '', 'bg-slate-800 text-white', '');
+
+            const msgId = addToTranscript('Moderator', 'moderator', '', 'bg-slate-800 text-white', '');
             const fullHistory = contextRef.current;
             let contextStr = "";
             if (fullHistory.length > 30) {
                 const topicMsg = fullHistory[0];
-                const recentMsgs = fullHistory.slice(-25); 
-                contextStr = [topicMsg, "...(中间历史省略)...", ...recentMsgs].join("\n\n");
+                const recentMsgs = fullHistory.slice(-25);
+                contextStr = [topicMsg, "...(earlier history omitted)...", ...recentMsgs].join("\n\n");
             } else { contextStr = fullHistory.join("\n\n"); }
 
-            const prompt = `你是主持人。议题: "${topic}"。\n记录: """${contextStr}"""\n请总结争议焦点、深度洞察，并给出最终决议。中文。`;
+            const prompt = `You are the moderator. Topic: "${topic}".\nTranscript: """${contextStr}"""\nSummarize the main disagreements and deepest insights, then issue a final resolution. Respond in English.`;
             let currentText = ""; let currentReasoning = "";
             try {
               await streamLLM([{ role: "user", content: prompt }], config.moderatorModel,
                 (t) => { currentText += t; updateMessage(msgId, currentText, currentReasoning); },
                 (r) => { currentReasoning += r; updateMessage(msgId, currentText, currentReasoning); }
               );
-              contextRef.current.push(`主持人: ${currentText}`);
+              contextRef.current.push(`Moderator: ${currentText}`);
               finalizeMessage(msgId, currentText, currentReasoning);
-            } catch (e) { 
+            } catch (e) {
                 if (!abortControllerRef.current?.signal.aborted) {
-                    updateMessage(msgId, `(生成失败: ${e.message})`, currentReasoning); 
+                    updateMessage(msgId, `(Generation failed: ${e.message})`, currentReasoning);
                 }
             }
           };
@@ -750,21 +750,21 @@
           const startNewSession = async () => {
             if (!topic.trim()) return;
             if (!config.apiKey) { setIsSettingsOpen(true); return; }
-            
+
             // Create new controller
             abortControllerRef.current = new AbortController();
-            
+
             const newId = generateId();
             const newSession = { id: newId, topic, date: new Date().toISOString(), agents: [], transcript: [] };
             setCurrentSessionId(newId);
-            activeSessionIdRef.current = newId; 
+            activeSessionIdRef.current = newId;
             setSessions(prev => [newSession, ...prev]);
             setAgents([]); setTranscript([]);
-            contextRef.current = [`当前议题: ${topic}`];
+            contextRef.current = [`Current topic: ${topic}`];
             setIsProcessing(true); setStage('recruiting');
 
             try {
-              addToTranscript('系统', 'system', "正在组建贤者议会...");
+              addToTranscript('System', 'system', "Assembling the Council of Sages...");
               const targetCount = config.expandedCouncil ? 5 : 3;
 
               const selectedSkillAgents = [];
@@ -785,53 +785,53 @@
               const specifiedAgents = config.specifyAgents
                 ? customAgentNames.slice(0, targetCount).filter((n, idx) => n.trim() && !customAgentSkills[idx])
                 : [];
-              const specifiedNamesStr = specifiedAgents.length > 0 ? specifiedAgents.join("、") : "无";
-              const specifiedInstruction = specifiedAgents.length > 0 
-                ? `\n重要：用户已指定必须包含以下议员：【${specifiedNamesStr}】。请优先为这些指定议员生成合适的人设描述。`
+              const specifiedNamesStr = specifiedAgents.length > 0 ? specifiedAgents.join(", ") : "None";
+              const specifiedInstruction = specifiedAgents.length > 0
+                ? `\nImportant: The user requires the following council members: [${specifiedNamesStr}]. Prioritize appropriate persona descriptions for these specified members.`
                 : "";
 
               const remainingCount = Math.max(0, targetCount - selectedSkillAgents.length);
-              const prompt = `议题: "${topic}"。识别 **${remainingCount}个** 专家(Personas)。返回纯JSON数组: [{ "name": "...", "description": "..." }]${specifiedInstruction}`;
+              const prompt = `Topic: "${topic}". Identify **${remainingCount}** expert personas. Return only a JSON array: [{ "name": "...", "description": "..." }]${specifiedInstruction}. Use English names and descriptions.`;
               let recruited = [];
               if (remainingCount > 0) try {
                 // Pass null for signal since callLLM uses the same streamLLM logic which reads the ref
                 const raw = await callLLM([{ role: "user", content: prompt }], config.moderatorModel);
                 if (abortControllerRef.current?.signal.aborted) return;
-                
+
                 recruited = JSON.parse(raw.replace(/```json/g, '').replace(/```/g, '').trim());
                 if (recruited.length < remainingCount) {
                     const needed = remainingCount - recruited.length;
                     recruited = [...recruited, ...FALLBACK_AGENTS_POOL.filter(f => !recruited.some(r => r.name === f.name)).slice(0, needed)];
                 }
               } catch (e) { recruited = FALLBACK_AGENTS_POOL.slice(0, remainingCount); }
-              
+
               if (abortControllerRef.current?.signal.aborted) return;
 
               const colors = ["bg-blue-50 border-blue-200 text-blue-900", "bg-emerald-50 border-emerald-200 text-emerald-900", "bg-purple-50 border-purple-200 text-purple-900", "bg-amber-50 border-amber-200 text-amber-900", "bg-rose-50 border-rose-200 text-rose-900"];
               const mergedAgents = [...selectedSkillAgents, ...recruited].slice(0, targetCount);
               const styledAgents = mergedAgents.map((a, i) => ({ ...a, style: colors[i % colors.length] }));
-              
+
               setAgents(styledAgents);
-              updateSessionInHistory(newId, { agents: styledAgents }); 
-              addToTranscript('系统', 'system', `议会组建完成: ${styledAgents.map(a => a.name).join(', ')}`);
+              updateSessionInHistory(newId, { agents: styledAgents });
+              addToTranscript('System', 'system', `Council assembled: ${styledAgents.map(a => a.name).join(', ')}`);
 
               setStage('debating');
               const rounds = Math.max(1, parseInt(config.debateRounds) || 1);
               for (let i = 1; i <= rounds; i++) {
                 if (abortControllerRef.current?.signal.aborted) return;
-                const title = i === 1 ? "第一轮：破题阐述" : (config.deepDebate ? `第${i}轮：深度辩论` : `第${i}轮：交叉审议`);
-                addToTranscript('主持人', 'moderator', title, "bg-slate-800 text-white");
+                const title = i === 1 ? "Round 1: Opening Positions" : (config.deepDebate ? `Round ${i}: Deep Debate` : `Round ${i}: Cross-Examination`);
+                addToTranscript('Moderator', 'moderator', title, "bg-slate-800 text-white");
                 await runDebateRound(styledAgents, i === 1 ? 'initial' : 'rebuttal');
               }
 
               if (abortControllerRef.current?.signal.aborted) return;
               setStage('concluding');
-              addToTranscript('系统', 'system', "正在起草决议...");
+              addToTranscript('System', 'system', "Drafting the final resolution...");
               await runConsensus();
               setStage('finished');
             } catch (error) {
               if (!abortControllerRef.current?.signal.aborted) {
-                  addToTranscript('系统', 'system', `❌ 错误: ${error.message}`);
+                  addToTranscript('System', 'system', `❌ Error: ${error.message}`);
                   setStage('error');
               }
             } finally { setIsProcessing(false); }
@@ -840,14 +840,14 @@
           const handleUserSubmit = async () => {
             if (!userInput.trim()) return;
             const text = userInput; setUserInput('');
-            const msgId = addToTranscript('我 (用户)', 'user', text, 'bg-gray-100 border-gray-300 text-gray-800');
+            const msgId = addToTranscript('Me (User)', 'user', text, 'bg-gray-100 border-gray-300 text-gray-800');
             finalizeMessage(msgId, text, "");
             if (!isProcessing && agents.length > 0) {
                 // Restart processing if user intervenes
                 abortControllerRef.current = new AbortController();
                 setIsProcessing(true);
                 setStage('debating');
-                addToTranscript('系统', 'system', "收到新观点，继续讨论...");
+                addToTranscript('System', 'system', "New input received. Continuing the discussion...");
                 await runDebateRound(agents, 'rebuttal');
                 setStage('finished');
                 setIsProcessing(false);
@@ -856,7 +856,7 @@
 
           const continueDebate = async () => {
             setStage('debating');
-            addToTranscript('系统', 'system', "收到新观点，继续讨论...");
+            addToTranscript('System', 'system', "New input received. Continuing the discussion...");
             await runDebateRound(agents, 'rebuttal');
             setStage('finished');
           };
@@ -872,13 +872,13 @@
           const loadSession = (session) => {
             if (isProcessing) return;
             setCurrentSessionId(session.id);
-            activeSessionIdRef.current = session.id; 
+            activeSessionIdRef.current = session.id;
             setTopic(session.topic);
             setAgents(session.agents || []);
             setTranscript(session.transcript || []);
-            const rebuilt = [`当前议题: ${session.topic}`];
+            const rebuilt = [`Current topic: ${session.topic}`];
             (session.transcript || []).forEach(t => {
-               const prefix = t.role === 'user' ? `[用户介入]: ` : `${t.sender}: `;
+               const prefix = t.role === 'user' ? `[User intervention]: ` : `${t.sender}: `;
                rebuilt.push(`${prefix}${t.text}`);
             });
             contextRef.current = rebuilt;
@@ -887,7 +887,7 @@
           };
 
           const downloadSingleSession = (targetSession = null) => {
-            let data = []; let title = "未命名议题";
+            let data = []; let title = "Untitled Topic";
             if (targetSession) { data = targetSession.transcript || []; title = targetSession.topic; }
             else if (activeSessionIdRef.current) {
                 const s = sessions.find(x => x.id === activeSessionIdRef.current);
@@ -895,17 +895,17 @@
                 else { data = transcript; title = topic; }
             } else { data = transcript; title = topic; }
 
-            if (!data || data.length === 0) { alert("下载失败：未找到有效对话记录。"); return; }
-            let content = `# 议题：${title}\n\n时间：${new Date().toLocaleString()}\n\n---\n\n`;
-            data.forEach(msg => { 
+            if (!data || data.length === 0) { alert("Download failed: no valid transcript was found."); return; }
+            let content = `# Topic: ${title}\n\nDate: ${new Date().toLocaleString()}\n\n---\n\n`;
+            data.forEach(msg => {
                 if(msg.role!=='system') {
                     content += `### ${msg.sender}\n`;
-                    if (msg.reasoning) content += `> [思考] ${msg.reasoning.replace(/\n/g,'\n> ')}\n\n`;
+                    if (msg.reasoning) content += `> [Reasoning] ${msg.reasoning.replace(/\n/g,'\n> ')}\n\n`;
                     content += `${msg.text}\n\n`;
                 }
             });
             const url = URL.createObjectURL(new Blob([content], { type: 'text/markdown' }));
-            const a = document.createElement('a'); a.href = url; a.download = `贤者议会_${title.slice(0,10).replace(/[\\/:*?"<>|]/g, '')}.md`; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = `council_of_sages_${title.slice(0,10).replace(/[\\/:*?"<>|]/g, '')}.md`; a.click();
           };
 
           const downloadAllSessions = () => {
@@ -916,7 +916,7 @@
           // --- VIEW HELPERS ---
           const structuredRounds = useMemo(() => {
             const rounds = [];
-            let currentRound = { title: "开场", msgs: [] };
+            let currentRound = { title: "Opening", msgs: [] };
             transcript.forEach(msg => {
                 const isMod = msg.role === 'moderator';
                 const isModContent = isMod && (msg.text.length > 50 || msg.text.includes('\n'));
@@ -925,14 +925,14 @@
                 if (isRoundMarker) {
                     if (currentRound.msgs.length > 0) rounds.push(currentRound);
                     let title = msg.text;
-                    if (title.includes("第一轮")) title = "第一轮：观点阐述";
-                    else if (title.includes("第二轮")) title = "第二轮：交叉辩论";
-                    else if (title.includes("决议") || title.includes("起草")) title = "最终决议 (起草中...)";
+                    if (title.includes("Round 1")) title = "Round 1: Opening Positions";
+                    else if (title.includes("Round 2")) title = "Round 2: Cross-Examination";
+                    else if (title.includes("Resolution") || title.includes("Draft")) title = "Final Resolution (Drafting...)";
                     currentRound = { title: title, msgs: [] };
                 } else if (isMod && isModContent) {
-                    if (currentRound.title !== "最终决议") {
+                    if (currentRound.title !== "Final Resolution") {
                          if (currentRound.msgs.length > 0) rounds.push(currentRound);
-                         currentRound = { title: "最终决议", msgs: [] };
+                         currentRound = { title: "Final Resolution", msgs: [] };
                     }
                     currentRound.msgs.push(msg);
                 } else if (msg.role !== 'system') {
@@ -956,8 +956,8 @@
             <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
               {/* Sidebar */}
               <div className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
-                <div className="p-4 border-b border-gray-100"><h1 className="text-lg font-bold flex items-center gap-2 text-indigo-600"><Users className="w-6 h-6" /> 贤者议会</h1></div>
-                <div className="p-2"><button onClick={() => {setTopic(''); setCurrentSessionId(null); setAgents([]); setTranscript([]); setStage('idle'); setIsSettingsOpen(false);}} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"><Plus className="w-4 h-4" /> 新增议题</button></div>
+                <div className="p-4 border-b border-gray-100"><h1 className="text-lg font-bold flex items-center gap-2 text-indigo-600"><Users className="w-6 h-6" /> Council of Sages</h1></div>
+                <div className="p-2"><button onClick={() => {setTopic(''); setCurrentSessionId(null); setAgents([]); setTranscript([]); setStage('idle'); setIsSettingsOpen(false);}} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"><Plus className="w-4 h-4" /> New Topic</button></div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
                   {sessions.map(s => (
                     <div key={s.id} onClick={() => loadSession(s)} className={`group p-3 rounded-lg cursor-pointer text-sm border transition-all ${currentSessionId === s.id ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-transparent hover:bg-gray-50'}`}>
@@ -967,16 +967,16 @@
                   ))}
                 </div>
                 <div className="p-3 border-t border-gray-200 bg-gray-50">
-                    <button onClick={downloadAllSessions} disabled={!sessions.length} className="w-full flex items-center justify-center gap-2 text-slate-600 text-xs font-medium mb-3"><Download className="w-3 h-3" /> 本地备份 (JSON)</button>
+                    <button onClick={downloadAllSessions} disabled={!sessions.length} className="w-full flex items-center justify-center gap-2 text-slate-600 text-xs font-medium mb-3"><Download className="w-3 h-3" /> Local Backup (JSON)</button>
                     <div className="pt-2 border-t border-gray-200">
                         {isGoogleSignedIn ? (
                             <div className="space-y-2">
-                                <div className="flex items-center justify-between text-xs text-green-700 font-medium px-1"><span>已连接 Google Drive</span><button onClick={handleGoogleLogout} title="注销"><LogOut className="w-3 h-3" /></button></div>
-                                <button onClick={uploadToDrive} disabled={driveStatus==='uploading'} className="w-full flex items-center justify-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-medium py-1.5 rounded transition-colors">{driveStatus==='uploading'?<RotateCcw className="w-3 h-3 animate-spin"/>:<Cloud className="w-3 h-3"/>} 备份到云端</button>
-                                {driveStatus==='success' && <div className="text-[10px] text-center text-green-600">备份成功!</div>}
+                                <div className="flex items-center justify-between text-xs text-green-700 font-medium px-1"><span>Google Drive Connected</span><button onClick={handleGoogleLogout} title="Sign out"><LogOut className="w-3 h-3" /></button></div>
+                                <button onClick={uploadToDrive} disabled={driveStatus==='uploading'} className="w-full flex items-center justify-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-medium py-1.5 rounded transition-colors">{driveStatus==='uploading'?<RotateCcw className="w-3 h-3 animate-spin"/>:<Cloud className="w-3 h-3"/>} Back Up to Cloud</button>
+                                {driveStatus==='success' && <div className="text-[10px] text-center text-green-600">Backup complete!</div>}
                             </div>
                         ) : (
-                            <button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 text-xs font-medium transition-colors"><UploadCloud className="w-3 h-3" /> 连接 Google Drive</button>
+                            <button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 text-xs font-medium transition-colors"><UploadCloud className="w-3 h-3" /> Connect Google Drive</button>
                         )}
                     </div>
                 </div>
@@ -985,19 +985,19 @@
               {/* Main */}
               <div className="flex-1 flex flex-col min-w-0 bg-white">
                 <header className="h-14 border-b border-gray-200 flex justify-between items-center px-6 shrink-0 z-10 bg-white/80 backdrop-blur-sm sticky top-0">
-                  <div className="md:hidden font-bold text-indigo-600">贤者议会</div>
+                  <div className="md:hidden font-bold text-indigo-600">Council of Sages</div>
                   <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                      <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`} title="列表流视图"><List className="w-4 h-4" /></button>
-                      <button onClick={() => setViewMode('board')} className={`p-1.5 rounded-md transition-all ${viewMode === 'board' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`} title="结构化看板视图"><LayoutGrid className="w-4 h-4" /></button>
+                      <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`} title="List view"><List className="w-4 h-4" /></button>
+                      <button onClick={() => setViewMode('board')} className={`p-1.5 rounded-md transition-all ${viewMode === 'board' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`} title="Board view"><LayoutGrid className="w-4 h-4" /></button>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-0.5 text-[11px] font-semibold" role="group" aria-label="Language switcher">
-                      <button type="button" onClick={() => switchLanguage('zh')} className={`rounded-md px-2 py-1 transition-colors bg-indigo-600 text-white shadow-sm`} aria-pressed={true}>中文</button>
-                      <button type="button" onClick={() => switchLanguage('en')} className={`rounded-md px-2 py-1 transition-colors text-slate-500 hover:text-slate-700`} aria-pressed={false}>EN</button>
+                      <button type="button" onClick={() => switchLanguage('zh')} className={`rounded-md px-2 py-1 transition-colors text-slate-500 hover:text-slate-700`} aria-pressed={false}>中文</button>
+                      <button type="button" onClick={() => switchLanguage('en')} className={`rounded-md px-2 py-1 transition-colors bg-indigo-600 text-white shadow-sm`} aria-pressed={true}>EN</button>
                     </div>
                     {transcript.length > 0 && <button onClick={() => downloadSingleSession()} className="p-2 rounded-full text-gray-500 hover:bg-indigo-50"><FileText className="w-5 h-5" /></button>}
-                    {isProcessing && <button onClick={handleStop} className="flex items-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-red-200"><Square className="w-3 h-3 fill-current" /> 停止研讨</button>}
-                    <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500" title="全局设置 (云端备份)"><Settings className="w-5 h-5" /></button>
+                    {isProcessing && <button onClick={handleStop} className="flex items-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-red-200"><Square className="w-3 h-3 fill-current" /> Stop Debate</button>}
+                    <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500" title="Global Settings (Cloud Backup)"><Settings className="w-5 h-5" /></button>
                   </div>
                 </header>
 
@@ -1006,11 +1006,11 @@
                     {/* Main Settings (Now just for Cloud Backup) */}
                     {isSettingsOpen && (
                       <div className="bg-white p-6 rounded-xl border border-gray-200 mb-8 shadow-sm animate-in slide-in-from-top-2">
-                         <div className="flex justify-between items-center mb-6 border-b pb-2"><h2 className="text-xl font-bold flex items-center gap-2 text-slate-800"><Settings className="w-5 h-5" /> 全局设置</h2><button onClick={() => setIsSettingsOpen(false)} className="text-gray-400 hover:text-gray-600">收起</button></div>
+                         <div className="flex justify-between items-center mb-6 border-b pb-2"><h2 className="text-xl font-bold flex items-center gap-2 text-slate-800"><Settings className="w-5 h-5" /> Global Settings</h2><button onClick={() => setIsSettingsOpen(false)} className="text-gray-400 hover:text-gray-600">Collapse</button></div>
                          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                             <div className="flex items-center gap-2 mb-2"><Cloud className="w-4 h-4 text-indigo-500"/><label className="block text-sm font-medium text-gray-700">云端备份配置 (Google Drive)</label></div>
+                             <div className="flex items-center gap-2 mb-2"><Cloud className="w-4 h-4 text-indigo-500"/><label className="block text-sm font-medium text-gray-700">Cloud Backup (Google Drive)</label></div>
                              <input type="text" placeholder="Google Client ID (e.g., 123...apps.googleusercontent.com)" className="w-full p-2 border rounded mt-1 text-sm font-mono bg-white focus:bg-white" value={config.googleClientId} onChange={e => setConfig({...config, googleClientId: e.target.value})} />
-                             <p className="text-[10px] text-gray-400 mt-1">需在 Google Cloud Console 创建 OAuth 2.0 Client ID，并添加本页面的 URL 到“已获授权的 JavaScript 来源”。</p>
+                             <p className="text-[10px] text-gray-400 mt-1">Create an OAuth 2.0 Client ID in Google Cloud Console and add this page's URL to Authorized JavaScript origins.</p>
                          </div>
                       </div>
                     )}
@@ -1018,17 +1018,17 @@
                     {transcript.length === 0 && !isProcessing && (
                       <div className="flex flex-col items-center justify-center py-20 animate-in fade-in zoom-in duration-500">
                         <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><BrainCircuit className="w-10 h-10" /></div>
-                        <h2 className="text-3xl font-bold text-slate-800 mb-3">贤者议会</h2>
-                        <p className="text-slate-500 mb-10 max-w-md text-center">输入一个复杂议题，召唤 3-5 位顶尖思维模型为您进行深度剖析。</p>
+                        <h2 className="text-3xl font-bold text-slate-800 mb-3">Council of Sages</h2>
+                        <p className="text-slate-500 mb-10 max-w-md text-center">Enter a complex topic and convene 3–5 expert reasoning personas for an in-depth analysis.</p>
                         <div className="w-full max-w-2xl relative group">
                           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
                           <div className="relative bg-white rounded-2xl p-2 shadow-xl">
-                             <AutoResizeTextarea value={topic} onChange={(e) => setTopic(e.target.value)} onEnter={startNewSession} placeholder="例如：通用人工智能对人类就业的终极影响是什么？" className="w-full p-4 text-lg outline-none bg-transparent resize-none" />
+                             <AutoResizeTextarea value={topic} onChange={(e) => setTopic(e.target.value)} onEnter={startNewSession} placeholder="For example: What will be the long-term impact of AGI on human employment?" className="w-full p-4 text-lg outline-none bg-transparent resize-none" />
                              <div className="flex justify-between items-center px-4 pb-2 border-t border-gray-100 pt-2 mt-2">
-                                <button onClick={() => setConfig(prev => ({...prev, isSeminarConfigOpen: true}))} className="text-xs text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-slate-100"><Wrench className="w-3 h-3" /> 研讨设置</button>
+                                <button onClick={() => setConfig(prev => ({...prev, isSeminarConfigOpen: true}))} className="text-xs text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-slate-100"><Wrench className="w-3 h-3" /> Debate Settings</button>
                                 <div className="flex items-center gap-3">
-                                   <span className="text-[10px] text-gray-300">Shift + Enter 换行</span>
-                                   <button onClick={startNewSession} disabled={!topic.trim() || !config.apiKey} className="bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-700 disabled:bg-gray-300 transition-colors font-medium flex items-center gap-2"><Play className="w-4 h-4" /> 开始研讨</button>
+                                   <span className="text-[10px] text-gray-300">Shift + Enter for a new line</span>
+                                   <button onClick={startNewSession} disabled={!topic.trim() || !config.apiKey} className="bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-700 disabled:bg-gray-300 transition-colors font-medium flex items-center gap-2"><Play className="w-4 h-4" /> Start Debate</button>
                                 </div>
                              </div>
                           </div>
@@ -1038,13 +1038,13 @@
 
                     {transcript.length > 0 && viewMode === 'board' && (
                         <div className="space-y-8 animate-in fade-in duration-300">
-                            <div className="text-center mb-4"><h2 className="text-2xl font-bold text-slate-800">{topic}</h2>{isProcessing && <div className="flex items-center justify-center gap-2 text-indigo-600 text-sm mt-2 animate-pulse"><Cpu className="w-4 h-4" /> 贤者正在思考中...</div>}</div>
+                            <div className="text-center mb-4"><h2 className="text-2xl font-bold text-slate-800">{topic}</h2>{isProcessing && <div className="flex items-center justify-center gap-2 text-indigo-600 text-sm mt-2 animate-pulse"><Cpu className="w-4 h-4" /> The council is deliberating...</div>}</div>
                             <div className="flex gap-6 overflow-x-auto pb-4 snap-x">{structuredRounds.map((round, idx) => (<div key={idx} className="flex-none w-80 md:w-96 flex flex-col gap-4 snap-start"><div className="font-bold text-slate-600 border-b-2 border-indigo-100 pb-2 mb-2 sticky top-0 bg-slate-50/95 backdrop-blur z-10 flex items-center gap-2"><span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">Phase {idx+1}</span>{round.title.replace(/[:：].*$/, '')}</div><div className="flex flex-col gap-3">{round.msgs.map(msg => (<MessageCard key={msg.id} msg={msg} onSelect={setSelectedMsg} />))}</div></div>))}</div>
                         </div>
                     )}
 
                     {transcript.length > 0 && viewMode === 'list' && (
-                        <div className="space-y-6 animate-in fade-in duration-300 max-w-3xl mx-auto"><div className="text-center mb-8 border-b border-gray-200 pb-6"><h2 className="text-2xl font-bold text-slate-800">{topic}</h2></div>{transcript.map(msg => <MessageBubble key={msg.id} msg={msg} />)}{isProcessing && stage === 'recruiting' && <div className="text-center text-gray-400 animate-pulse">组建团队中...</div>}</div>
+                        <div className="space-y-6 animate-in fade-in duration-300 max-w-3xl mx-auto"><div className="text-center mb-8 border-b border-gray-200 pb-6"><h2 className="text-2xl font-bold text-slate-800">{topic}</h2></div>{transcript.map(msg => <MessageBubble key={msg.id} msg={msg} />)}{isProcessing && stage === 'recruiting' && <div className="text-center text-gray-400 animate-pulse">Assembling the council...</div>}</div>
                     )}
                   </div>
                 </main>
@@ -1052,7 +1052,7 @@
                 {(transcript.length > 0 || isProcessing) && (
                   <div className="border-t border-gray-200 bg-white p-4 sticky bottom-0 z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
                     <div className="max-w-4xl mx-auto flex gap-2 items-end">
-                      <AutoResizeTextarea value={userInput} onChange={(e) => setUserInput(e.target.value)} onEnter={handleUserSubmit} placeholder="插入讨论或追问..." className="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition bg-white" />
+                      <AutoResizeTextarea value={userInput} onChange={(e) => setUserInput(e.target.value)} onEnter={handleUserSubmit} placeholder="Add a point or ask a follow-up question..." className="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition bg-white" />
                       <button onClick={handleUserSubmit} disabled={!userInput.trim()} className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:bg-gray-300 transition-colors h-[46px] w-[46px] flex items-center justify-center shrink-0"><Send className="w-5 h-5" /></button>
                     </div>
                   </div>
@@ -1063,57 +1063,57 @@
                     <div className="space-y-8">
                         <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-4">
                             <Wrench className="w-6 h-6 text-indigo-600" />
-                            <h2 className="text-2xl font-bold text-slate-800">研讨设置 (Seminar Config)</h2>
+                            <h2 className="text-2xl font-bold text-slate-800">Debate Settings (Seminar Config)</h2>
                         </div>
 
                         {/* 1. Core Model Config */}
                         <div>
-                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><Cpu className="w-4 h-4"/> 核心模型配置</h3>
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><Cpu className="w-4 h-4"/> Core Model Configuration</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-5 rounded-xl border border-gray-100">
                                 <div className="space-y-4">
                                     <div><label className="text-sm font-medium text-gray-700">Base URL</label><input type="text" placeholder="https://api.aihubmix.com/v1" className="w-full p-2 border rounded mt-1 text-sm font-mono" value={config.baseUrl} onChange={e => setConfig({...config, baseUrl: e.target.value})} /></div>
                                     <div><label className="text-sm font-medium text-gray-700">API Key</label><input type="password" placeholder="sk-..." className="w-full p-2 border rounded mt-1 text-sm font-mono" value={config.apiKey} onChange={e => setConfig({...config, apiKey: e.target.value})} /></div>
                                     <div className="flex items-center gap-4 text-sm">
-                                        <button onClick={testConnection} className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-xs transition-colors ${manualModelInput ? 'bg-white border-indigo-200 text-indigo-600 hover:bg-indigo-50' : 'bg-slate-200 text-slate-700 border-transparent'}`}>{connectionStatus === 'testing' ? <RotateCcw className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} {manualModelInput ? '测试连通性' : '测试连接 (获取列表)'}</button>
-                                        {connectionStatus === 'success' && <span className="text-green-600 flex items-center gap-1 text-xs"><CheckCircle2 className="w-3 h-3"/> 连接成功</span>}
+                                        <button onClick={testConnection} className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-xs transition-colors ${manualModelInput ? 'bg-white border-indigo-200 text-indigo-600 hover:bg-indigo-50' : 'bg-slate-200 text-slate-700 border-transparent'}`}>{connectionStatus === 'testing' ? <RotateCcw className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} {manualModelInput ? 'Testing connection...' : 'Test Connection & Load Models'}</button>
+                                        {connectionStatus === 'success' && <span className="text-green-600 flex items-center gap-1 text-xs"><CheckCircle2 className="w-3 h-3"/> Connected</span>}
                                     </div>
                                     {errorMessage && <div className="text-xs text-red-600 bg-red-50 p-2 rounded">{errorMessage}</div>}
                                 </div>
                                 <div className="space-y-4">
-                                    <div onClick={() => setConfig(prev => ({...prev, expandedCouncil: !prev.expandedCouncil}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.expandedCouncil ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><Users className="w-4 h-4 inline mr-2 text-indigo-600"/> 扩容议会 (5人)</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.expandedCouncil ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${config.expandedCouncil ? 'left-4.5' : 'left-0.5'}`} style={{left: config.expandedCouncil ? '18px' : '2px'}}/></div></div>
-                                    <div onClick={() => setConfig(prev => ({...prev, deepDebate: !prev.deepDebate}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.deepDebate ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><Zap className="w-4 h-4 inline mr-2 text-amber-500"/> 深度辩论</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.deepDebate ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all`} style={{left: config.deepDebate ? '18px' : '2px'}}/></div></div>
-                                    {config.deepDebate && <div className="flex items-center justify-between text-sm pl-2"><label>轮次:</label><input type="number" min="1" max="5" value={config.debateRounds} onChange={e => setConfig({...config, debateRounds: parseInt(e.target.value)})} className="w-16 p-1 border rounded text-center" /></div>}
-                                    
+                                    <div onClick={() => setConfig(prev => ({...prev, expandedCouncil: !prev.expandedCouncil}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.expandedCouncil ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><Users className="w-4 h-4 inline mr-2 text-indigo-600"/> Expanded Council (5 members)</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.expandedCouncil ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${config.expandedCouncil ? 'left-4.5' : 'left-0.5'}`} style={{left: config.expandedCouncil ? '18px' : '2px'}}/></div></div>
+                                    <div onClick={() => setConfig(prev => ({...prev, deepDebate: !prev.deepDebate}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.deepDebate ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><Zap className="w-4 h-4 inline mr-2 text-amber-500"/> Deep Debate</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.deepDebate ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all`} style={{left: config.deepDebate ? '18px' : '2px'}}/></div></div>
+                                    {config.deepDebate && <div className="flex items-center justify-between text-sm pl-2"><label>Rounds:</label><input type="number" min="1" max="5" value={config.debateRounds} onChange={e => setConfig({...config, debateRounds: parseInt(e.target.value)})} className="w-16 p-1 border rounded text-center" /></div>}
+
                                     <div className="pt-2 border-t border-gray-200 grid grid-cols-2 gap-2">
-                                        <div><div className="flex justify-between items-center mb-1"><label className="text-xs font-medium text-gray-500">议员模型</label></div>{manualModelInput || availableModels.length === 0 ? (<input type="text" className="w-full p-2 border border-gray-300 rounded text-xs" placeholder="e.g. deepseek-reasoner" value={config.model} onChange={(e) => setConfig({...config, model: e.target.value})} />) : (<div className="relative"><input type="text" placeholder="筛选..." className="w-full p-1 mb-1 border border-gray-200 rounded text-[10px] bg-gray-50" value={modelFilter} onChange={(e) => setModelFilter(e.target.value)} /><select className="w-full p-2 border border-gray-300 rounded text-xs bg-white" value={config.model} onChange={(e) => setConfig({...config, model: e.target.value})}>{filteredModels.map(m => <option key={m} value={m}>{m}</option>)}</select></div>)}</div>
-                                        <div><div className="flex justify-between items-center mb-1"><label className="text-xs font-medium text-gray-500">主持人模型</label></div>{manualModelInput || availableModels.length === 0 ? (<input type="text" className="w-full p-2 border border-gray-300 rounded text-xs" placeholder="e.g. gpt-4" value={config.moderatorModel} onChange={(e) => setConfig({...config, moderatorModel: e.target.value})} />) : (<div className="relative"><input type="text" placeholder="筛选..." className="w-full p-1 mb-1 border border-gray-200 rounded text-[10px] bg-gray-50" value={modFilter} onChange={(e) => setModFilter(e.target.value)} /><select className="w-full p-2 border border-gray-300 rounded text-xs bg-white" value={config.moderatorModel} onChange={(e) => setConfig({...config, moderatorModel: e.target.value})}>{filteredModModels.map(m => <option key={m} value={m}>{m}</option>)}</select></div>)}</div>
+                                        <div><div className="flex justify-between items-center mb-1"><label className="text-xs font-medium text-gray-500">Council Model</label></div>{manualModelInput || availableModels.length === 0 ? (<input type="text" className="w-full p-2 border border-gray-300 rounded text-xs" placeholder="e.g. deepseek-reasoner" value={config.model} onChange={(e) => setConfig({...config, model: e.target.value})} />) : (<div className="relative"><input type="text" placeholder="Filter..." className="w-full p-1 mb-1 border border-gray-200 rounded text-[10px] bg-gray-50" value={modelFilter} onChange={(e) => setModelFilter(e.target.value)} /><select className="w-full p-2 border border-gray-300 rounded text-xs bg-white" value={config.model} onChange={(e) => setConfig({...config, model: e.target.value})}>{filteredModels.map(m => <option key={m} value={m}>{m}</option>)}</select></div>)}</div>
+                                        <div><div className="flex justify-between items-center mb-1"><label className="text-xs font-medium text-gray-500">Moderator Model</label></div>{manualModelInput || availableModels.length === 0 ? (<input type="text" className="w-full p-2 border border-gray-300 rounded text-xs" placeholder="e.g. gpt-4" value={config.moderatorModel} onChange={(e) => setConfig({...config, moderatorModel: e.target.value})} />) : (<div className="relative"><input type="text" placeholder="Filter..." className="w-full p-1 mb-1 border border-gray-200 rounded text-[10px] bg-gray-50" value={modFilter} onChange={(e) => setModFilter(e.target.value)} /><select className="w-full p-2 border border-gray-300 rounded text-xs bg-white" value={config.moderatorModel} onChange={(e) => setConfig({...config, moderatorModel: e.target.value})}>{filteredModModels.map(m => <option key={m} value={m}>{m}</option>)}</select></div>)}</div>
                                     </div>
-                                    <div className="flex justify-end"><button onClick={() => setManualModelInput(!manualModelInput)} className="flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1 rounded-md transition-colors">{manualModelInput ? <ToggleLeft className="w-3 h-3" /> : <ToggleRight className="w-3 h-3" />} {manualModelInput ? "切换列表" : "切换手动"}</button></div>
+                                    <div className="flex justify-end"><button onClick={() => setManualModelInput(!manualModelInput)} className="flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1 rounded-md transition-colors">{manualModelInput ? <ToggleLeft className="w-3 h-3" /> : <ToggleRight className="w-3 h-3" />} {manualModelInput ? "Use model list" : "Enter manually"}</button></div>
                                 </div>
                             </div>
                         </div>
 
                         {/* 2. Advanced Thinking Config */}
                         <div>
-                             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><BrainCircuit className="w-4 h-4"/> 高级思维设定</h3>
+                             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><BrainCircuit className="w-4 h-4"/> Advanced Reasoning Settings</h3>
                              <div className="bg-slate-50 p-5 rounded-xl border border-gray-100 space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"><Feather className="w-4 h-4 text-indigo-500"/> 议员思维与语言风格 (Style Prompt)</label>
-                                    <textarea className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition h-20 resize-y" placeholder="例如：请使用通俗易懂、逻辑严密的专业中文..." value={config.agentStylePrompt} onChange={(e) => setConfig({...config, agentStylePrompt: e.target.value})} />
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"><Feather className="w-4 h-4 text-indigo-500"/> Council Reasoning & Language Style</label>
+                                    <textarea className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition h-20 resize-y" placeholder="For example: Use clear, accessible, and logically rigorous professional English." value={config.agentStylePrompt} onChange={(e) => setConfig({...config, agentStylePrompt: e.target.value})} />
                                 </div>
                                 <div className="pt-4 border-t border-gray-200">
                                     <div className="mb-4 bg-white border rounded-lg p-3">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-sm font-medium text-slate-700"><Database className="w-4 h-4 text-indigo-500" /> Skill 管理器</div>
-                                            <button onClick={refreshRemoteSkills} disabled={isRefreshingSkills} className="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50">{isRefreshingSkills ? '检查中...' : '手动刷新最新 Skill'}</button>
+                                            <div className="flex items-center gap-2 text-sm font-medium text-slate-700"><Database className="w-4 h-4 text-indigo-500" /> Skill Manager</div>
+                                            <button onClick={refreshRemoteSkills} disabled={isRefreshingSkills} className="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50">{isRefreshingSkills ? 'Checking...' : 'Refresh Available Skills'}</button>
                                         </div>
-                                        <div className="text-xs text-slate-500 mt-2">内置 {BUILTIN_SKILLS.length} 个（已排除张雪峰），已导入 {importedSkills.length} 个。名称已统一为英文显示。</div>
+                                        <div className="text-xs text-slate-500 mt-2">{BUILTIN_SKILLS.length} built-in skills and {importedSkills.length} imported skills. Names are displayed consistently in English.</div>
                                         <div className="mt-3">
-                                            <label className="text-xs text-slate-600 font-medium block mb-1">自定义 GitHub Skill 来源（每行一个，支持 owner/repo 或 URL）</label>
+                                            <label className="text-xs text-slate-600 font-medium block mb-1">Custom GitHub skill sources (one per line; owner/repo or URL)</label>
                                             <textarea className="w-full p-2 border rounded text-xs h-20 bg-slate-50" placeholder="alchaincyf/steve-jobs-skill&#10;https://github.com/user/your-skill-repo" value={customSkillSources} onChange={(e) => setCustomSkillSources(e.target.value)} />
                                         </div>
                                         <div className="mt-3">
-                                            <label className="text-xs text-slate-600 font-medium block mb-1">本地上传 Skill 文件（.json / .md，可多选）</label>
+                                            <label className="text-xs text-slate-600 font-medium block mb-1">Upload local skill files (.json or .md; multiple files allowed)</label>
                                             <input type="file" multiple accept=".json,.md,.markdown,.txt" onChange={handleLocalSkillUpload} className="text-xs w-full" />
                                         </div>
                                         {skillStatus && <div className="text-xs mt-2 text-indigo-600">{skillStatus}</div>}
@@ -1123,8 +1123,8 @@
                                                     <label key={skill.id} className={`flex items-center justify-between text-xs gap-2 ${skill.isDuplicate ? 'opacity-60' : ''}`}>
                                                         <span className="truncate">
                                                             {skill.name} <span className="text-slate-400">({skill.repo.split('/')[1] || skill.repo})</span>
-                                                            {skill.isBuiltIn && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-amber-100 text-amber-700">内置重复</span>}
-                                                            {!skill.isBuiltIn && skill.isImported && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-blue-100 text-blue-700">已导入</span>}
+                                                            {skill.isBuiltIn && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-amber-100 text-amber-700">Built-in duplicate</span>}
+                                                            {!skill.isBuiltIn && skill.isImported && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-blue-100 text-blue-700">Imported</span>}
                                                         </span>
                                                         <input type="checkbox" disabled={skill.isDuplicate} checked={selectedImportSkillIds.includes(skill.id)} onChange={() => toggleImportSelection(skill.id)} />
                                                     </label>
@@ -1132,17 +1132,17 @@
                                             </div>
                                         )}
                                         <div className="flex justify-end mt-2">
-                                            <button onClick={importSelectedSkills} disabled={!selectedImportSkillIds.length} className="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300">导入已选 Skill</button>
+                                            <button onClick={importSelectedSkills} disabled={!selectedImportSkillIds.length} className="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300">Import Selected Skills</button>
                                         </div>
                                     </div>
-                                    <div onClick={() => setConfig(prev => ({...prev, specifyAgents: !prev.specifyAgents}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.specifyAgents ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><UserPlus className="w-4 h-4 inline mr-2 text-indigo-600"/> 指定议员名单 (可选)</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.specifyAgents ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${config.specifyAgents ? 'left-4.5' : 'left-0.5'}`} style={{left: config.specifyAgents ? '18px' : '2px'}}/></div></div>
+                                    <div onClick={() => setConfig(prev => ({...prev, specifyAgents: !prev.specifyAgents}))} className={`p-3 border rounded cursor-pointer flex justify-between items-center ${config.specifyAgents ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}`}><span><UserPlus className="w-4 h-4 inline mr-2 text-indigo-600"/> Specify Council Members (Optional)</span><div className={`w-8 h-4 rounded-full relative transition-colors ${config.specifyAgents ? 'bg-indigo-600' : 'bg-gray-300'}`}><div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${config.specifyAgents ? 'left-4.5' : 'left-0.5'}`} style={{left: config.specifyAgents ? '18px' : '2px'}}/></div></div>
                                     {config.specifyAgents && (
                                         <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 animate-in fade-in">
                                             {Array(config.expandedCouncil ? 5 : 3).fill(0).map((_, i) => (
                                                 <div key={i} className="grid grid-cols-2 gap-2">
-                                                    <input type="text" placeholder={`议员 ${i+1} 名称`} className="p-2 border rounded text-xs" value={customAgentNames[i] || ''} onChange={(e) => { const newNames = [...customAgentNames]; newNames[i] = e.target.value; setCustomAgentNames(newNames); }} />
+                                                    <input type="text" placeholder={`Member ${i+1} name`} className="p-2 border rounded text-xs" value={customAgentNames[i] || ''} onChange={(e) => { const newNames = [...customAgentNames]; newNames[i] = e.target.value; setCustomAgentNames(newNames); }} />
                                                     <select className="p-2 border rounded text-xs bg-white" value={customAgentSkills[i] || ''} onChange={(e) => { const newSkills = [...customAgentSkills]; newSkills[i] = e.target.value; setCustomAgentSkills(newSkills); }}>
-                                                        <option value="">不指定 Skill</option>
+                                                        <option value="">No skill</option>
                                                         {effectiveSkills.map(skill => <option key={skill.id} value={skill.id}>{skill.name}</option>)}
                                                     </select>
                                                 </div>
@@ -1154,7 +1154,7 @@
                         </div>
 
                         <div className="flex justify-end pt-4">
-                            <button onClick={() => setConfig({...config, isSeminarConfigOpen: false})} className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium">完成设置</button>
+                            <button onClick={() => setConfig({...config, isSeminarConfigOpen: false})} className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium">Save Settings</button>
                         </div>
                     </div>
                 </Modal>
@@ -1166,7 +1166,7 @@
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${selectedMsg.role === 'moderator' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600'}`}>{selectedMsg.sender[0]}</div>
                                 <div><h3 className="text-xl font-bold text-slate-900">{selectedMsg.sender}</h3><div className="text-sm text-gray-500 flex items-center gap-2">{new Date(selectedMsg.timestamp).toLocaleString()}{selectedMsg.role === 'agent' && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs">Council Member</span>}</div></div>
                             </div>
-                            {selectedMsg.reasoning && (<div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-slate-700"><div className="font-bold text-amber-700 mb-2 flex items-center gap-2"><Lightbulb className="w-4 h-4"/> 深度思考过程</div><div className="whitespace-pre-wrap leading-relaxed opacity-90">{selectedMsg.reasoning}</div></div>)}
+                            {selectedMsg.reasoning && (<div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-slate-700"><div className="font-bold text-amber-700 mb-2 flex items-center gap-2"><Lightbulb className="w-4 h-4"/> Detailed Reasoning</div><div className="whitespace-pre-wrap leading-relaxed opacity-90">{selectedMsg.reasoning}</div></div>)}
                             <div className="prose prose-lg max-w-none text-slate-800 leading-loose" dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedMsg.text || '') }} />
                         </div>
                     )}
@@ -1182,10 +1182,10 @@
           rootEl.innerHTML = `
             <div class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
               <div class="max-w-xl w-full bg-white border border-red-200 rounded-xl p-5 shadow-sm">
-                <h2 class="text-lg font-bold text-red-600 mb-2">页面加载失败（V9.1）</h2>
-                <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${String(message || '未知错误')}</p>
-                <p class="text-xs text-slate-500 mt-3">建议：1) 清理 localStorage；2) 使用 python -m http.server 启动后访问。</p>
-                <a class="mt-4 inline-flex rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700" href="index-V9.1-en.html">Open English version</a>
+                <h2 class="text-lg font-bold text-red-600 mb-2">Page failed to load (V9.1)</h2>
+                <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${String(message || 'Unknown error')}</p>
+                <p class="text-xs text-slate-500 mt-3">Try: 1) clear localStorage; 2) run python -m http.server and open the page from the local server.</p>
+                <a class="mt-4 inline-flex rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700" href="index-V9.1.html">打开中文版本</a>
               </div>
             </div>
           `;
