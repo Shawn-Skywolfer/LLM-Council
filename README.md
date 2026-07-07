@@ -12,14 +12,11 @@
 - **会话管理** - 本地存储辩论历史，支持导出为 Markdown
 - **云端备份** - 可选的 Google Drive 集成实现云端备份
 - **深度思考支持** - 支持显示带有推理过程的模型输出
+- **Kimi Coding Plan 兼容** - V9.2 在 Kimi/Moonshot 模型列表拉取失败时提供 Kimi 模型候选和手动输入通道
 
 ## 快速开始
 
-### 方法 1：直接打开
-
-直接打开 `index-V9.1.html`，然后使用页面顶部的 **中文 / EN** 控件随时切换界面语言。也可以直接打开 `index-V9.1-en.html` 从英文界面开始。
-
-### 方法 2：本地服务器
+### 方法 1：本地服务器（推荐）
 
 ```bash
 # 使用 Python
@@ -28,8 +25,14 @@ python -m http.server 8000
 # 使用 Node.js
 npx serve .
 
-# 然后访问 http://localhost:8000
+# 然后访问 http://localhost:8000/index-V9.2.html
 ```
+
+V9.2 会在启动时加载 V9.1 源文件并应用兼容修复，因此推荐通过本地服务器访问，避免浏览器对 `file://` 读取本地文件的限制。
+
+### 方法 2：直接打开
+
+直接打开 `index-V9.2.html`，然后使用页面顶部的 **中文 / EN** 控件随时切换界面语言。也可以直接打开 `index-V9.2-en.html` 从英文界面开始。如果浏览器阻止本地文件读取，请改用本地服务器方式。
 
 ## 配置说明
 
@@ -38,11 +41,12 @@ npx serve .
 1. **API 设置** - 在设置中配置 OpenAI 兼容的 API 端点
    - 默认使用 OpenAI API
    - 支持自定义 Base URL（用于其他兼容的 API 服务）
+   - Kimi/Moonshot 端点在 `/models` 不可用时，会自动给出 `kimi-k2.7` 等候选模型
 
 2. **API Key** - 输入你的 API 密钥（安全地存储在本地浏览器中）
 
 3. **模型选择** - 选择用于辩论的模型
-   - 建议使用 GPT-5 或同等级别模型以获得最佳效果（推荐DeepSeek-V3.2和GLM-4.7）
+   - 建议使用 GPT-5 或同等级别模型以获得最佳效果（推荐DeepSeek-V3.2、GLM-4.7 和 Kimi K2.7）
    - 可使用我的邀请链接，注册AIHubMix，使用最新的大模型：
    https://aihubmix.com/?aff=G1zJ
 
@@ -64,15 +68,17 @@ npx serve .
 
 ```
 LLM-Concil/
-├── index-V9.1.html     # 完整的单文件应用（简体中文，当前版本）
-├── index-V9.1-en.html  # 双语切换的英文界面入口
-├── index-V9.html    # V9 版本
-├── index-V8.HTML    # 旧版本备份
-├── CLAUDE.md        # Claude Code 开发指南
-└── README.md        # 本文件
+├── index-V9.2.html     # 简体中文入口（当前版本）
+├── index-V9.2-en.html  # English entry（当前版本）
+├── index-V9.1.html     # V9.1 简体中文源文件
+├── index-V9.1-en.html  # V9.1 English source
+├── index-V9.html       # V9 版本
+├── index-V8.HTML       # 旧版本备份
+├── CLAUDE.md           # Claude Code 开发指南
+└── README.md           # 本文件
 ```
 
-整个应用是一个独立的 HTML 文件，无需构建步骤或依赖安装。
+整个应用保持零构建架构，无需依赖安装。V9.2 入口会加载 V9.1 源文件并在浏览器端应用小范围兼容补丁。
 
 ## 使用场景
 
@@ -84,10 +90,10 @@ LLM-Concil/
 
 ## 语言支持
 
-V9.1 提供可随时切换的中英双语界面：
+V9.2 提供可随时切换的中英双语界面：
 
-- `index-V9.1.html`：默认显示**简体中文**
-- `index-V9.1-en.html`：默认显示 **English**
+- `index-V9.2.html`：默认显示**简体中文**
+- `index-V9.2-en.html`：默认显示 **English**
 - 页面顶部的 **中文 / EN** 控件可以在两个语言界面之间切换
 - 两种语言共享配置、会话记录和已导入 Skills，切换后会恢复当前议题与输入草稿
 - 新发起的辩论会按照当前界面语言生成中文或英文内容
@@ -101,7 +107,7 @@ V9.1 提供可随时切换的中英双语界面：
 
 ## 开发
 
-这是一个零构建架构项目。双语界面分别位于 `index-V9.1.html` 和 `index-V9.1-en.html`，通过页面顶部的语言控件互相切换，并共享浏览器本地数据。修改后刷新浏览器即可看到效果。
+这是一个零构建架构项目。双语界面分别位于 `index-V9.2.html` 和 `index-V9.2-en.html`，通过页面顶部的语言控件互相切换，并共享浏览器本地数据。修改后刷新浏览器即可看到效果。
 
 ## 许可证
 
