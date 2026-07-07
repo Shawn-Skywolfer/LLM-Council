@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Council of Sages V9.2</title>
+    <style>
+        body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #0f172a; }
+        .loader { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .card { max-width: 640px; width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); }
+        h1 { font-size: 20px; margin: 0 0 10px; }
+        p { color: #475569; line-height: 1.7; margin: 0; }
+        code { background: #f1f5f9; border-radius: 6px; padding: 2px 6px; }
+        .error { border-color: #fecaca; }
+        .error h1 { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loader">
+        <div class="card">
+            <h1>Council of Sages V9.2 is loading...</h1>
+            <p>V9.2 applies the settings-modal and Kimi Coding Plan compatibility fixes at startup. If direct file opening fails, run <code>python -m http.server 8000</code> and open this page through localhost.</p>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        const SOURCE_FILE = 'index-V9.1-en.html';
+        const VERSION = 'V9.2';
+        const KIMI_MODELS = ['kimi-k2.7', 'kimi-k2.7-preview', 'kimi-k2-7', 'kimi-k2', 'kimi-latest', 'moonshot-v1-128k', 'moonshot-v1-32k', 'moonshot-v1-8k'];
+        const joinLines = (lines) => lines.join('\n');
+
+        const showError = (message) => {
+            const loader = document.getElementById('loader');
+            loader.innerHTML = `
+                <div class="card error">
+                    <h1>Page Load Failed (${VERSION})</h1>
+                    <p>${String(message || 'Unknown error')}</p>
+                    <p style="margin-top:12px">Try serving the folder locally: <code>python -m http.server 8000</code>, then open <code>http://localhost:8000/index-V9.2-en.html</code>.</p>
+                </div>
+            `;
+        };
+
+        const patchModal = (html) => {
+            const original = joinLines([
+                '        const Modal = ({ isOpen, onClose, children, maxWidth = "max-w-4xl" }) => {',
+                '            if (!isOpen) return null;',
+                '            return (',
+                '                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay bg-black/50 backdrop-blur-sm" onClick={onClose}>',
+                '                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-hidden flex flex-col modal-content`} onClick={e => e.stopPropagation()}>'
+            ]);
+            const replacement = joinLines([
+                '        const Modal = ({ isOpen, onClose, children, maxWidth = "max-w-4xl" }) => {',
+                '            const overlayPointerDownRef = useRef(false);',
+                '            if (!isOpen) return null;',
+                '            const handleOverlayPointerDown = (e) => {',
+                '                overlayPointerDownRef.current = e.target === e.currentTarget;',
+                '            };',
+                '            const handleOverlayClick = (e) => {',
+                '                if (overlayPointerDownRef.current && e.target === e.currentTarget) onClose();',
+                '                overlayPointerDownRef.current = false;',
+                '            };',
+                '            return (',
+                '                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay bg-black/50 backdrop-blur-sm" onMouseDown={handleOverlayPointerDown} onClick={handleOverlayClick}>',
+                '                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-hidden flex flex-col modal-content`} onMouseDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>'
+            ]);
+            if (!html.includes(original)) throw new Error('Could not find the Modal component for the modal-close fix.');
+            return html.replace(original, replacement);
+        };
+
+        const patchModels = (html) => {
+            const replacement = joinLines([
+                '          const KIMI_MODEL_FALLBACKS = ' + JSON.stringify(KIMI_MODELS) + ';',
+                '          const isKimiEndpoint = () => /moonshot|kimi/i.test(getCleanUrl());',
+                '          const normalizeModelId = (model) => {',
+                "             if (!model) return '';",
+                "             if (typeof model === 'string') return model;",
+                "             return model.id || model.name || model.model || '';",
+                '          };',
+                '          const mergeModelIds = (...groups) => Array.from(new Set(groups.flat().map(normalizeModelId).filter(Boolean))).sort((a, b) => a.localeCompare(b));',
+                '          const applyKimiFallbackModels = (reason) => {',
+                '             const ids = mergeModelIds(availableModels, KIMI_MODEL_FALLBACKS);',
+                '             setAvailableModels(ids);',
+                '             setConfig(prev => ({',
+                '                ...prev,',
+                "                model: prev.model && prev.model !== 'gpt-3.5-turbo' ? prev.model : ids[0],",
+                "                moderatorModel: prev.moderatorModel && prev.moderatorModel !== 'gpt-3.5-turbo' ? prev.moderatorModel : ids[0]",
+                '             }));',
+                '             setManualModelInput(false);',
+                "             setConnectionStatus('warning');",
+                "             setErrorMessage(`Using Kimi-compatible model presets because /models could not be fetched (${reason || 'unknown reason'}). You can select kimi-k2.7 or switch to manual input and enter the model ID from your Kimi Coding Plan.`);",
+                '          };',
+                '',
+                '          const fetchModels = async () => {',
+                '             if (!config.apiKey) { setErrorMessage("Please enter API Key first"); setConnectionStatus(\'error\'); return; }',
+                "             setConnectionStatus('testing'); setErrorMessage('');",
+                '             const baseUrl = getCleanUrl();',
+                '             try {',
+                "               const res = await fetch(`${baseUrl}/models`, { headers: { 'Authorization': `Bearer ${config.apiKey.trim()}` } });",
+                "               if (!res.ok) {",
+                "                  const detail = await res.text().catch(() => '');",
+                "                  throw new Error(`HTTP ${res.status}${detail ? ': ' + detail.slice(0, 200) : ''}`);",
+                '               }',
+                '               const data = await res.json();',
+                '               const ids = mergeModelIds(data.data || data.models || data);',
+                '               if(ids.length === 0) throw new Error("No models");',
+                '               const nextIds = isKimiEndpoint() ? mergeModelIds(ids, KIMI_MODEL_FALLBACKS) : ids;',
+                '               setAvailableModels(nextIds);',
+                "               setConnectionStatus('success');",
+                '               setManualModelInput(false);',
+                '               setConfig(prev => {',
+                '                  const nextModel = nextIds.includes(prev.model) ? prev.model : nextIds[0];',
+                '                  const nextModeratorModel = nextIds.includes(prev.moderatorModel) ? prev.moderatorModel : nextModel;',
+                '                  return { ...prev, model: nextModel, moderatorModel: nextModeratorModel };',
+                '               });',
+                '             } catch(e) {',
+                '               console.warn(e);',
+                '               if (isKimiEndpoint()) { applyKimiFallbackModels(e.message); return; }',
+                '               if (!manualModelInput) setManualModelInput(true);',
+                "               setConnectionStatus('warning');",
+                '               setErrorMessage(`Connection test failed: ${e.message}. Please check URL/Key or CORS settings.`);',
+                '             }',
+                '          };',
+                '          ',
+                '          const testConnection = () => { fetchModels(); };'
+            ]);
+            const pattern = /          const fetchModels = async \(\) => \{[\s\S]*?\n          const testConnection = \(\) => \{ fetchModels\(\); \};/;
+            if (!pattern.test(html)) throw new Error('Could not find the model fetch function for the Kimi fix.');
+            return html.replace(pattern, replacement);
+        };
+
+        const patchVersionLinks = (html) => html
+            .replaceAll('index-V9.1-en.html', 'index-V9.2-en.html')
+            .replaceAll('index-V9.1.html', 'index-V9.2.html')
+            .replaceAll('V9.1', 'V9.2');
+
+        const load = async () => {
+            try {
+                const response = await fetch(SOURCE_FILE, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`Could not read ${SOURCE_FILE}: HTTP ${response.status}`);
+                let html = await response.text();
+                html = patchModal(html);
+                html = patchModels(html);
+                html = patchVersionLinks(html);
+                document.open();
+                document.write(html);
+                document.close();
+            } catch (error) {
+                console.error(error);
+                showError(error.message);
+            }
+        };
+
+        load();
+    })();
+    </script>
+</body>
+</html>
